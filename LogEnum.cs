@@ -30,7 +30,7 @@ namespace CF
 
     }
 
-    class LogEnumerator : IEnumerator<string>
+    class LogEnumerator : IEnumerator<string>, IDisposable
     {
         private string currentStr = null;
         private string nextStr = null;
@@ -56,6 +56,7 @@ namespace CF
 
         public void Dispose()
         {
+            reader.Close();
         }
 
         object IEnumerator.Current

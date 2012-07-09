@@ -87,10 +87,21 @@ namespace CF
 
             //clickPlot(20000);
 
-            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
-            //Tester.ABTest_c(10, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\", 0, 1);
-            //Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", 0, 1);
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
+            Tester.ABTest_h(10000, 30000, 1000, 10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", 0, 1);
+            Tester.ABTest_c(6, 10, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\", 0, 1);
+            
+            
+            Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", 0, 1);
             //aggregateStats(10, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\");
+
+            
+
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
+            Tester.ABTest_c(50, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\click\\", 0, 1);
+            Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\view\\", 0, 1);
+
 
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             Tester.ABTest_c(10, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection not removed\\click\\", 0, 1);
