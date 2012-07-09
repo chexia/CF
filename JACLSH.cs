@@ -430,6 +430,7 @@ namespace CF
 
         public Dictionary<int, Dictionary<int, double>> hashMap;
         private int colnum, rownum;
+        private double nullRtn;
         public JACPointMatrix(int rownum, int colnum, double nullRtn)
         {
             this.rownum = rownum;
@@ -440,9 +441,9 @@ namespace CF
         public double get(int row, int col)
         {
             if (!hashMap.ContainsKey(col))
-                return Double.NaN;
+                return nullRtn;
             if (!(hashMap[col].ContainsKey(row)))
-                return Double.NaN;
+                return nullRtn;
             return hashMap[col][row];
         }
         public void set(int row, int col, double value)
