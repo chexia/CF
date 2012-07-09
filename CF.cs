@@ -80,7 +80,7 @@ namespace CF
         {
             if (this.utilMat.get(row, col) != -1)
             {
-                throw new Exception("waaaaaaaaaaaaaaa");
+                //return this.utilMat.get(row, col);
             }
             double rtn = 0;
             double sum = 0;

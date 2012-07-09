@@ -41,7 +41,6 @@ namespace CF
 
             rewrite(in_test, out_test, standardProcessor, i2int, a2int);
             rewrite(in_train, out_train, standardProcessor, i2int, a2int);
-            Console.WriteLine("{0},{1}", i2int.getCount(), a2int.getCount());
             return new int[2] { i2int.getCount(), a2int.getCount() };
         }
 

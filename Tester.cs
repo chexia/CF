@@ -158,7 +158,7 @@ namespace CF
 
             for (int vreq = s; vreq <= e; vreq += step)
             {
-                for (int creq = s2; creq <= e2; creq += step2)
+                for (int creq = s; creq <= e; creq += step)
                 {
                     reader = File.OpenText(string.Format(trainPath));
                     points = new List<double[]>();
