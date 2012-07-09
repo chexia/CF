@@ -21,7 +21,7 @@ namespace CF
         private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
         private CF filter;
         private Random randGen = new Random();
-        public LSH(Matrix utilMat, int r, int b, CF filter)
+        public LSH(UTMat utilMat, int r, int b, CF filter)
         {
             this.filter = filter;
             this.numSets = utilMat.GetLength(1);
@@ -51,7 +51,7 @@ namespace CF
                 ICollection<int> neighbors = revSigMat[bandInd][hashCode];
                 foreach (int i in neighbors)
                 {
-                    if (this.filter.utilMat.get(principalRow,i)!=-1)
+                    if (this.filter.utilMat.contains(principalRow,col))
                         candidates.Add(i);
                 }
             }
@@ -86,7 +86,7 @@ namespace CF
         /* produces signature matrix from original matrix, for compression purposes
          * @arguments: takes in the original matrix
          */
-        private void compSigMatEntries(Matrix utilMat)
+        private void compSigMatEntries(UTMat utilMat)
         {
             int[] bandArr = new int[b];
             for (int i=0;i<b;i++)
@@ -103,11 +103,12 @@ namespace CF
                                                                         for (int vecInd = 0; vecInd < r; vecInd++)
                                                                         {
                                                                             double result = 0;
-                                                                            for (int row = 0; row < utilMat.GetLength(0); row++)
+                                                                            if (utilMat.contains(col))
                                                                             {
-                                                                                if (utilMat.get(row, col) == -1)
-                                                                                    continue;
-                                                                                result += currBand[vecInd][row] * utilMat.get(row, col);
+                                                                                foreach (int row in utilMat.getRowsOfCol(col))
+                                                                                {
+                                                                                    result += currBand[vecInd][row] * utilMat.get(row, col);
+                                                                                }
                                                                             }
                                                                             if (result >= 0)
                                                                                 tmpHash += 1;

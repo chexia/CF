@@ -14,9 +14,9 @@ namespace CF
     class Tester
     {
         private CF filter;
-        private Matrix testPoints;
+        private UTMat testPoints;
         private StreamWriter writer;
-        public Tester(CF filter, Matrix testPoints)
+        public Tester(CF filter, UTMat testPoints)
         {
             this.filter = filter;
             this.testPoints = testPoints;
@@ -26,9 +26,9 @@ namespace CF
         {
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
-            Parallel.ForEach<int>(testPoints.mat.hashMap.Keys, act);
-            //foreach (int key in testPoints.mat.hashMap.Keys)
-            //    act(key);
+            //Parallel.ForEach<int>(testPoints.getCols(), act);
+            foreach (int key in testPoints.getCols())
+                act(key);
             writer.Close();
             IO.accumulateResult(outputFilePath, outputFilePath+".txt");
         }
@@ -60,7 +60,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            UTMat testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
             Console.WriteLine("check 2");
 
             for (int req = s; req <= e; req += step)
@@ -87,7 +87,7 @@ namespace CF
                     points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views)/views : Double.Parse(tokens[2]) });
                 }
                 Console.WriteLine("Check 3");
-                Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+                UTMat utilMat = new UTMat(maxRow + 1, maxCol + 1, points);
 
                 CF filter = new CF(utilMat);
                 Console.WriteLine("check 4");
@@ -106,7 +106,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            UTMat testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
             Console.WriteLine("check 2");
 
             for (int req = s; req <= e; req += step)
@@ -133,7 +133,7 @@ namespace CF
                     points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
                 }
                 Console.WriteLine("Check 3");
-                Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+                UTMat utilMat = new UTMat(maxRow + 1, maxCol + 1, points);
 
                 CF filter = new CF(utilMat);
                 Console.WriteLine("check 4");
@@ -153,7 +153,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            UTMat testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
             Console.WriteLine("check 2");
 
             for (int vreq = s; vreq <= e; vreq += step)
@@ -182,7 +182,7 @@ namespace CF
                         points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
                     }
                     Console.WriteLine("Check 3");
-                    Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+                    UTMat utilMat = new UTMat(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
                     Console.WriteLine("check 4");
@@ -200,10 +200,10 @@ namespace CF
             Console.WriteLine("mia:{0}, {1}, {2}", mia[0], mia[1], mia[2]);
             //int[] mia = new int[3] { 448397, 274, 2462 };
 
-            Matrix ad_muid_view = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 2);
-            Matrix ad_muid_click = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 3);
-            Matrix intent_muid = LogProcess.makeUtilMat(mia[1], mia[0], "msi_processed.log", 2, 0, 1);
-            Matrix intent_ad = LogProcess.makeUtilMat(mia[1], mia[2], "iavc_processed.log", 0, 1, -1);
+            UTMat ad_muid_view = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 2);
+            UTMat ad_muid_click = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 3);
+            UTMat intent_muid = LogProcess.makeUtilMat(mia[1], mia[0], "msi_processed.log", 2, 0, 1);
+            UTMat intent_ad = LogProcess.makeUtilMat(mia[1], mia[2], "iavc_processed.log", 0, 1, -1);
             CF filter = new CF(intent_ad);
 
             Console.WriteLine("check 1");
@@ -228,7 +228,7 @@ namespace CF
         }
 
 
-        public static double testFixedBlock(int numUsr, int numAd, Matrix ad_muid_click, Matrix ad_muid_view, Matrix intent_muid, CF filter, StreamWriter writer, string outputFile = "C:\\Users\\t-chexia\\Desktop\\blocktest\\blockTestOutput.txt")
+        public static double testFixedBlock(int numUsr, int numAd, UTMat ad_muid_click, UTMat ad_muid_view, UTMat intent_muid, CF filter, StreamWriter writer, string outputFile = "C:\\Users\\t-chexia\\Desktop\\blocktest\\blockTestOutput.txt")
         {
             //StreamWriter writer = new StreamWriter(outputFile, true);
             int tries = 10;
@@ -245,7 +245,7 @@ namespace CF
                 {
                     foreach (int ad in adSample)
                     {
-                        if (!ad_muid_click.contains(ad, user) || !intent_muid.mat.hashMap.ContainsKey(user))
+                        if (!ad_muid_click.contains(ad, user) || !intent_muid.contains(user))
                             continue;
                         numClick += ad_muid_click.get(ad, user);
                         numView += ad_muid_view.get(ad, user);
@@ -292,12 +292,12 @@ namespace CF
             return avg;
         }
 
-        private static double recomputeIntentAdCtr(int ad, int user, Matrix ad_muid_click, Matrix ad_muid_view, Matrix intent_muid, CF filter)
+        private static double recomputeIntentAdCtr(int ad, int user, UTMat ad_muid_click, UTMat ad_muid_view, UTMat intent_muid, CF filter)
         {
             int principalIntent = 0;
             double principalScore = double.MinValue;
 
-            foreach (int intent in intent_muid.mat.hashMap[user].Keys)
+            foreach (int intent in intent_muid.getRowsOfCol(user))
             {
                 double score = intent_muid.get(intent, user);
 
@@ -309,8 +309,8 @@ namespace CF
             }
             double view = 0;
             double click = 0;
-            foreach (int muid in intent_muid.mat.hashMap.Keys)
-                if (intent_muid.mat.hashMap[muid].ContainsKey(principalIntent))
+            foreach (int muid in intent_muid.getCols())
+                if (intent_muid.contains(muid,principalIntent))
                     if (ad_muid_click.contains(ad, muid))
                     {
                         view += ad_muid_view.get(ad, muid);
@@ -318,20 +318,14 @@ namespace CF
                     }
             return click / view;
         }
-        private static double predictUserAdCtr(int user, int ad, Matrix intent_muid, CF filter)
+        private static double predictUserAdCtr(int user, int ad, UTMat intent_muid, CF filter)
         {
             int principalIntent = 0;
             double principalScore = double.MinValue;
 
-            double ctrSum = 0;
-            double denom = 0;
-
-            foreach (int intent in intent_muid.mat.hashMap[user].Keys)
+            foreach (int intent in intent_muid.getRowsOfCol(user))
             {
                 double score = intent_muid.get(intent, user);
-                //double ctr = filter.predict(intent, ad);
-                //ctrSum += score * ctr;
-                //denom += score;
 
                 if (score > principalScore)
                 {

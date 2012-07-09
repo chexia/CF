@@ -74,7 +74,7 @@ namespace CF
         }
 
 
-        public static Matrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 1, int colPos = 0, int valPos = -1)
+        public static UTMat makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
             List<double[]> points = new List<double[]>();
             LogEnum logenum = new LogEnum(inputFilePath);
@@ -93,7 +93,7 @@ namespace CF
                 rowNum = Math.Max(rowNum, (int)point[0]);
                 colNum = Math.Max(colNum, (int)point[1]);
             }
-            Matrix utilMat = new Matrix(rowNum+1, colNum+1, points);//+1 for 0
+            UTMat utilMat = new UTMat(rowNum+1, colNum+1, points);//+1 for 0
             return utilMat;
         }
     }

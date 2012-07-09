@@ -10,11 +10,11 @@ namespace CF
     [Serializable()]
     class CF
     {
-        public Matrix utilMat;
+        public UTMat utilMat;
         public LSH myLSH;
 
 
-        public CF(Matrix utilMat, bool usingLSH=true, int r=10, int b=20, bool norm=true)
+        public CF(UTMat utilMat, bool usingLSH=true, int r=10, int b=20, bool norm=true)
         {
             this.utilMat = utilMat;
             if (norm)
@@ -32,7 +32,7 @@ namespace CF
                 List<int> candidates = new List<int>(); ;
                 for (int i = 0; i < utilMat.GetLength(1); i++)
                 {
-                    if (utilMat.get(row,i)!=-1 && i!=col)
+                    if (utilMat.contains(row,i) && i!=col)
                         candidates.Add(i);
                 }
                 return candidates.ToArray();
@@ -78,9 +78,9 @@ namespace CF
         }
         public double predict(int[] kneighbors, double[] ksimMeasure, int row, int col)
         {
-            if (this.utilMat.get(row, col) != -1)
+            if (this.utilMat.contains(row,col))
             {
-                throw new Exception("waaaaaaaaaaaaaaa");
+                //throw new Exception("waaaaaaaaaaaaaaa");
             }
             double rtn = 0;
             double sum = 0;
@@ -89,7 +89,7 @@ namespace CF
             {
                 if (kneighbors[i] == -1)
                     continue;
-                if (utilMat.get(row,kneighbors[i])==-1)
+                if (!utilMat.contains(row,kneighbors[i]))
                     continue;
                 double a = utilMat.get(row, kneighbors[i]);
                 double b = ksimMeasure[i];
@@ -116,7 +116,7 @@ namespace CF
                     return Double.NaN;//throw new Exception("cannot predict without estimate");
                 return this.utilMat.get(row, col)*this.utilMat.setDev[col]+this.utilMat.setAvg[col];
             }
-            if (!this.utilMat.mat.hashMap.ContainsKey(col))
+            if (!this.utilMat.contains(col))
                 return double.NaN;
             Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, 5);
             int[] kneighbors = ns.Item1;
@@ -142,7 +142,7 @@ namespace CF
                         }
                         if (maxConfidence < 0.7)
                             continue;
-                        if (utilMat.get(row, col) != -1)
+                        if (utilMat.contains(row,col))
                             utilMat.set(row, col, (utilMat.get(row, col) + predict(ns.Item1, ns.Item2, row, col)) / 2);
                         else
                             utilMat.set(row, col, predict(ns.Item1, ns.Item2, row, col));
