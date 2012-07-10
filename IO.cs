@@ -72,53 +72,43 @@ namespace CF
             //Console.WriteLine(b.GetHashCode());
 
             //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log");
-            
+
             //manReader("train_processed.");
 
 
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
-            Tester.ABTest_c(50, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\click2\\", 1, 0);
-            Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\view2\\", 1, 0);
 
-
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
-
-            
-            
             //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\", 0, 1);
-            
-            
+
+
             //aggregateStats(10000, 68500, 500);
             //manReader("test_processed.log");
             //reduceTrain("train_processed.log", "test_processed.log", "train_processed_2.log");
 
             //clickPlot(20000);
-<<<<<<< HEAD
-            //aggregateStats(10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", "aggregated_stats_17000_");
-            
+
             //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             //Tester.ABTest_h(10000, 30000, 1000, 10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", 0, 1);
-            
-            //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log");
-            return;
-            
-=======
+            //Tester.ABTest_c(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click2\\",0, 1);
 
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
-            Tester.ABTest_h(10000, 30000, 1000, 10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", 0, 1);
-            Tester.ABTest_c(6, 10, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\", 0, 1);
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
+            Tester.ABTest_h(10000, 20000, 200, 10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
             
-            
->>>>>>> parent of 85b1af9... halfway refactored utilmat, working so far
+            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
+            //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
+            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log");
+            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
+
+            return;
             Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", 0, 1);
             //aggregateStats(10, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\");
 
-            
 
+
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_4.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
+            Tester.ABTest_c(50, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\click\\", 0, 1);
+            Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\no view threshold\\view\\", 0, 1);
 
 
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
@@ -126,13 +116,6 @@ namespace CF
             Tester.ABTest(10000, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection not removed\\view\\", 0, 1);
 
 
-<<<<<<< HEAD
-=======
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
->>>>>>> parent of 85b1af9... halfway refactored utilmat, working so far
 
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
@@ -180,19 +163,19 @@ namespace CF
                 writer.WriteLine("{0}\t{1}", click, click_count[click]);
             writer.Close();
         }
-        
+
         /*
          * Given a log file, and given integerMaps to translate the strings in the log, produce a util matrix
          * */
 
-        public static void reduceTrain (string inputTrain, string inputTest, string outputTrain)
+        public static void reduceTrain(string inputTrain, string inputTest, string outputTrain)
         {
             Matrix testMatrix = LogProcess.makeUtilMat(1000, 100000, inputTest, 0, 1);
             LogEnum logenum = new LogEnum(inputTrain);
             StreamWriter writer = File.CreateText(outputTrain);
             foreach (string line in logenum)
             {
-                string[] tokens = line.Split(new char[]{'\t'});
+                string[] tokens = line.Split(new char[] { '\t' });
                 if (testMatrix.get(Int32.Parse(tokens[0]), Int32.Parse(tokens[1])) != -1)
                 {
                     Console.WriteLine(line);
@@ -294,7 +277,7 @@ namespace CF
             }
         }
 
-        public static void manReader (string inputFilePath)
+        public static void manReader(string inputFilePath)
         {
             LogEnum logenum = new LogEnum(inputFilePath);
             foreach (string line in logenum)
@@ -305,7 +288,7 @@ namespace CF
         }
 
 
-        public static void aggregateStats(int s, int e, int step, string inputPrefix, string outputPrefix = "aggregated_stats_")
+        public static void aggregateStats(int s, int e, int step, string inputPrefix)
         {
             Dictionary<double, double>[] threshold_count = new Dictionary<double, double>[10];
             //string inputPrefix = "705 ab results\\";
@@ -314,7 +297,7 @@ namespace CF
                 threshold_count[k] = new Dictionary<double, double>();
                 for (int i = s; i <= e; i += step)
                 {
-                    string inputPath = inputPrefix + "about_17000_" + i + ".txt.txt";
+                    string inputPath = inputPrefix + "about_" + i + ".txt.txt";
                     StreamReader reader = new StreamReader(inputPath);
                     string line = reader.ReadLine();
 
@@ -334,7 +317,7 @@ namespace CF
                     }
                     reader.Close();
                 }
-                string outputPath = inputPrefix +  outputPrefix + (0.1 * k) + ".txt";
+                string outputPath = inputPrefix + "aggregated_stat_" + (0.1 * k) + ".txt";
                 StreamWriter writer = File.CreateText(outputPath);
                 foreach (double key in threshold_count[k].Keys)
                 {

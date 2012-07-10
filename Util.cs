@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 namespace CF
 {
     [Serializable()]
-    class Matrix
+    class Matrix : PointMatrix
     {
 
         public double[] setAvg;
         public double[] setDev;
-        public PointMatrix mat;
-        public Matrix(int numRow, int numCol, List<double[]> points = null )
+        public Matrix(int numRow, int numCol, List<double[]> points = null)
+            : base(numRow, numCol)
         {
             setAvg = new double[numCol];
             setDev = new double[numCol];
@@ -25,39 +25,27 @@ namespace CF
             {
                 setDev[i] = 1;
             }
-            mat = new PointMatrix(numRow,numCol);
             if (points != null)
             {
                 foreach (double[] point in points)
                 {
                     int rowInd = (int)point[0];
                     int colInd = (int)point[1];
-                    mat.set(rowInd, colInd, point[2]);
+                    this.set(rowInd, colInd, point[2]);
                 }
             }
         }
 
-        public double get(int rowInd, int colInd)
+        public IEnumerable<int> getCols()
         {
-            return mat.get(rowInd, colInd);
+            return this.hashMap.Keys;
         }
-        public void set(int rowInd, int colInd, double value)
-        {
-            mat.set(rowInd, colInd, value);
-        }
-        public int GetLength(int dim)
-        {
-            return mat.GetLength(dim);
-        }
+
         public int[] getRowsOfCol(int col)
         {
-            if (!this.mat.hashMap.ContainsKey(col))
+            if (!this.hashMap.ContainsKey(col))
                 return null;
-            return this.mat.hashMap[col].Keys.ToArray<int>();
-        }
-        public bool contains (int row, int col)
-        {
-            return this.mat.contains(row, col);
+            return this.hashMap[col].Keys.ToArray<int>();
         }
         /* Takes in a matrix of doubles and normalizes each column in place,
          * such that each column sums to 1. "-1's" denote unknown entries and
@@ -68,21 +56,21 @@ namespace CF
          */
         public void normalize()
         {
-            int rowCount = mat.GetLength(0);
-            int colCount = mat.GetLength(1);
-            for (int col = 0; col < colCount; col++)
+            int rowCount = this.GetLength(0);
+            int colCount = this.GetLength(1);
+            foreach (int col in this.getCols())
             {
                 double sum = 0;
                 double sqsum = 0;
                 double seenCount = 0;
-                for (int row = 0; row < rowCount; row++)
+                foreach (int row in this.getRowsOfCol(col))
                 {
-                    if (mat.get(row, col) == -1)
+                    if (!this.contains(row, col))
                         continue;
                     else
                     {
-                        sqsum += Math.Pow(mat.get(row, col), 2);
-                        sum += mat.get(row, col);
+                        sqsum += Math.Pow(this.get(row, col), 2);
+                        sum += this.get(row, col);
                         seenCount++;
                     }
                 }
@@ -90,13 +78,13 @@ namespace CF
                 double std = (double.IsNaN(Math.Sqrt(sqsum / seenCount))) ? 0 : Math.Sqrt(sqsum / seenCount);
                 setAvg[col] = avg;
                 setDev[col] = std;
-                for (int row = 0; row < rowCount; row++)
+                foreach (int row in this.getRowsOfCol(col))
                 {
-                    if (mat.get(row, col) == -1)
+                    if (!this.contains(row, col))
                         continue;
                     else
                     {
-                        mat.set(row, col, (mat.get(row,col)-avg)/std);
+                        this.set(row, col, (this.get(row, col) - avg) / std);
                     }
                 }
             }
@@ -111,11 +99,11 @@ namespace CF
             double sum = 0;
             double sq1 = 0;
             double sq2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.mat.hashMap.ContainsKey(colInd1) || !this.mat.hashMap.ContainsKey(colInd2))
+            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
                 return 0;
-            foreach (int row in this.mat.hashMap[colInd1].Keys)
+            foreach (int row in this.hashMap[colInd1].Keys)
             {
-                if (this.get(row, colInd1) == -1 || this.get(row, colInd2) == -1)
+                if (!this.contains(row, colInd1) || !this.contains(row, colInd2))
                     continue;
                 double term1 = this.get(row, colInd1);
                 double term2 = this.get(row, colInd2);
@@ -141,22 +129,22 @@ namespace CF
             double overlapSum = 0;
             double sum1 = 0;
             double sum2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.mat.hashMap.ContainsKey(colInd1) || !this.mat.hashMap.ContainsKey(colInd2))
+            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
                 return 0;
-            foreach (int row in this.mat.hashMap[colInd1].Keys)
+            foreach (int row in this.hashMap[colInd1].Keys)
             {
                 sum1 += Math.Abs(this.get(row, colInd1));
-                if (mat.hashMap[colInd2].ContainsKey(row))
+                if (this.hashMap[colInd2].ContainsKey(row))
                     overlapSum += (Math.Abs(this.get(row, colInd1)) + Math.Abs(this.get(row, colInd2)));
             }
-            foreach (int row in this.mat.hashMap[colInd2].Keys)
+            foreach (int row in this.hashMap[colInd2].Keys)
             {
                 sum2 += Math.Abs(this.get(row, colInd2));
             }
             double rtn = overlapSum / (sum1 + sum2);
             if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
                 rtn = 0;
-            if (rtn <0)
+            if (rtn < 0)
                 sum1 = 1;
             return rtn;
         }
@@ -206,7 +194,7 @@ namespace CF
             this.rownum = rownum;
             this.colnum = colnum;
             this.hashMap = new Dictionary<int, Dictionary<int, double>>();
-            colnum=rownum=0;
+            colnum = rownum = 0;
         }
         public double get(int row, int col)
         {
@@ -255,7 +243,7 @@ namespace CF
             LogEnum logenum = new LogEnum(inputFilePath);
             List<double[]> points = new List<double[]>();
             double numEntries = 0;
-            foreach(string line in logenum)
+            foreach (string line in logenum)
             {
                 string[] tokens = line.Split(new char[] { '\t' });
                 this.add(tokens[pos]);

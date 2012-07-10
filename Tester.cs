@@ -26,7 +26,7 @@ namespace CF
         {
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
-            Parallel.ForEach<int>(testPoints.mat.hashMap.Keys, act);
+            Parallel.ForEach<int>(testPoints.hashMap.Keys, act);
             //foreach (int key in testPoints.mat.hashMap.Keys)
             //    act(key);
             writer.Close();
@@ -158,7 +158,7 @@ namespace CF
 
             for (int vreq = s; vreq <= e; vreq += step)
             {
-                for (int creq = s2; creq <= e2; creq += step2)
+                for (int creq = s; creq <= e; creq += step)
                 {
                     reader = File.OpenText(string.Format(trainPath));
                     points = new List<double[]>();
@@ -245,7 +245,7 @@ namespace CF
                 {
                     foreach (int ad in adSample)
                     {
-                        if (!ad_muid_click.contains(ad, user) || !intent_muid.mat.hashMap.ContainsKey(user))
+                        if (!ad_muid_click.contains(ad, user) || !intent_muid.hashMap.ContainsKey(user))
                             continue;
                         numClick += ad_muid_click.get(ad, user);
                         numView += ad_muid_view.get(ad, user);
@@ -297,7 +297,7 @@ namespace CF
             int principalIntent = 0;
             double principalScore = double.MinValue;
 
-            foreach (int intent in intent_muid.mat.hashMap[user].Keys)
+            foreach (int intent in intent_muid.hashMap[user].Keys)
             {
                 double score = intent_muid.get(intent, user);
 
@@ -309,8 +309,8 @@ namespace CF
             }
             double view = 0;
             double click = 0;
-            foreach (int muid in intent_muid.mat.hashMap.Keys)
-                if (intent_muid.mat.hashMap[muid].ContainsKey(principalIntent))
+            foreach (int muid in intent_muid.hashMap.Keys)
+                if (intent_muid.hashMap[muid].ContainsKey(principalIntent))
                     if (ad_muid_click.contains(ad, muid))
                     {
                         view += ad_muid_view.get(ad, muid);
@@ -326,7 +326,7 @@ namespace CF
             double ctrSum = 0;
             double denom = 0;
 
-            foreach (int intent in intent_muid.mat.hashMap[user].Keys)
+            foreach (int intent in intent_muid.hashMap[user].Keys)
             {
                 double score = intent_muid.get(intent, user);
                 //double ctr = filter.predict(intent, ad);
