@@ -71,7 +71,7 @@ namespace CF
             //Console.WriteLine(a.GetHashCode());
             //Console.WriteLine(b.GetHashCode());
 
-            //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log");
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log");
 
             //manReader("train_processed.");
 
@@ -79,7 +79,7 @@ namespace CF
 
             //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\", 0, 1);
-
+            return;
 
             //aggregateStats(10000, 68500, 500);
             //manReader("test_processed.log");
@@ -91,9 +91,9 @@ namespace CF
             //Tester.ABTest_h(10000, 30000, 1000, 10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", 0, 1);
             //Tester.ABTest_c(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click2\\",0, 1);
 
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            Tester.ABTest_h(10000, 20000, 200, 10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
-            
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
+            Tester.ABTest_h(10000, 20000, 500, 10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
+            return;
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log");

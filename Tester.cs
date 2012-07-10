@@ -30,7 +30,7 @@ namespace CF
             //foreach (int key in testPoints.mat.hashMap.Keys)
             //    act(key);
             writer.Close();
-            IO.accumulateResult(outputFilePath, outputFilePath+".txt");
+            IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
         }
 
         private void processCol(int col)
@@ -84,7 +84,7 @@ namespace CF
                         continue;
                     maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
                     maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
-                    points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views)/views : Double.Parse(tokens[2]) });
+                    points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
                 }
                 Console.WriteLine("Check 3");
                 Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
@@ -144,8 +144,8 @@ namespace CF
 
             Console.Write("debug: completed AB");
         }
-        
-        
+
+
         public static void ABTest_h(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
             StreamReader reader = File.OpenText(testPath);
@@ -158,7 +158,7 @@ namespace CF
 
             for (int vreq = s; vreq <= e; vreq += step)
             {
-                for (int creq = s; creq <= e; creq += step)
+                for (int creq = s2; creq <= e2; creq += step2)
                 {
                     reader = File.OpenText(string.Format(trainPath));
                     points = new List<double[]>();
@@ -175,7 +175,7 @@ namespace CF
                             clicks = Double.Parse(tokens[3]);
                             views = Double.Parse(tokens[2]);
                         }
-                        if (views < vreq || clicks<creq)
+                        if (views < vreq || clicks < creq)
                             continue;
                         maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
                         maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
@@ -187,7 +187,7 @@ namespace CF
                     CF filter = new CF(utilMat);
                     Console.WriteLine("check 4");
                     Tester tester = new Tester(filter, testPts);
-                    tester.abtest(outputPrefix + "about_" + vreq+"_"+creq + ".txt");
+                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
                     reader.Close();
                 }
             }
@@ -343,7 +343,7 @@ namespace CF
             return rtn;
         }
 
-        
+
     }
 
 }
