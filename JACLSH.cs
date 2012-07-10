@@ -13,7 +13,7 @@ namespace CF
 {
     class JACtest
     {
-        public static void jacSplitTest(string inputData, string outputPath="jac_result.txt") 
+        public static void jacSplitTest(string inputData, string outputPath="jac_result.txt", double threshold=0.5) 
         {
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
@@ -29,7 +29,7 @@ namespace CF
                                     for (int intent = 0; intent < ui[1]; intent += 1)
                                     {
                                         Double trueVal = testMat.get(intent, user);
-                                        Double predictedVal = filter.predict(intent, user);
+                                        Double predictedVal = filter.predict(intent, user, false, threshold);
                                         if (trueVal == predictedVal && trueVal == 1)
                                             stats[0]++;
                                         else if (trueVal == predictedVal && trueVal == 0)
@@ -54,18 +54,19 @@ namespace CF
                                  });
 
             Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
-            StreamWriter writer = new StreamWriter(outputPath);
-            writer.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
+            StreamWriter writer = new StreamWriter(outputPath, true);
+            writer.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}", final[0], final[1], final[2], final[3], threshold, inputData);
+            writer.Close();
         }
         /*
-         *         public static void jacSplitTest(string inputData) 
+        public static void jacSplitTest(string inputData) 
         {
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
             JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
             JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
-            JACCF filter = new JACCF(traintMat, false, 5, 10, false);
+            JACCF filter = new JACCF(traintMat, false, 5, 10, true);
             int truePos, trueNeg, falsePos, falseNeg;
             truePos = trueNeg = falsePos = falseNeg = 0;
 
@@ -87,8 +88,8 @@ namespace CF
 
 
         }
+        */
 
-         * */
 
         public static void split(string inputData, string out_test="jac_test.log", string out_train="jac_train.log")
         {
@@ -96,8 +97,15 @@ namespace CF
             Random randgen = new Random();
             StreamWriter testWriter = File.CreateText (out_test);
             StreamWriter trainWriter = File.CreateText (out_train);
+            HashSet<string> seen = new HashSet<string>();
             foreach (string line in logenum)
             {
+                if (seen.Contains(line))
+                {
+                    Console.WriteLine("duplicate");
+                    continue;
+                }
+                seen.Add(line);
                 if (randgen.NextDouble() < 0.3)
                     testWriter.WriteLine(line);
                 else
@@ -255,7 +263,7 @@ namespace CF
             return rtn;
 
         }
-        public double predict(int row, int col, bool noEstimate = false)
+        public double predict(int row, int col, bool noEstimate = false, double threshold=0.5)
         {
             if (noEstimate)
             {
@@ -270,7 +278,7 @@ namespace CF
             double[] ksimMeasure = ns.Item2;
             double rtn = this.predict(kneighbors, ksimMeasure, row, col);
             
-            return rtn<0.5?0:1;
+            return rtn<threshold?0:1;
         }
         public void iterate(int iterations)
         {
@@ -539,9 +547,6 @@ namespace CF
                 double seenCount = 0;
                 for (int row = 0; row < rowCount; row++)
                 {
-                    if (mat.get(row, col) == nullRtn)
-                        continue;
-                    else
                     {
                         sqsum += Math.Pow(mat.get(row, col), 2);
                         sum += mat.get(row, col);

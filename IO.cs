@@ -70,9 +70,14 @@ namespace CF
             //Tester.ABTest(10000, 100000, 5000000, ir+"test_processed.log", ir+"train_processed_2.log",ir+"705 ab results\\", 0, 1);
             //Console.WriteLine(a.GetHashCode());
             //Console.WriteLine(b.GetHashCode());
-
-            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log");
-
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small.log", "jac_result.txt", 0.5);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small.log", "jac_result.txt", 0.3);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.5);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.3);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.3);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.5);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.3);
             //manReader("train_processed.");
 
 
