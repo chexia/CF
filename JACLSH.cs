@@ -18,7 +18,7 @@ namespace CF
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log"); 
             JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
             JACCF filter = new JACCF(traintMat, false, 5, 10, false);
             int[] final = new int[4] { 0, 0, 0, 0 };

@@ -74,7 +74,7 @@ namespace CF
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small.log", "jac_result.txt", 0.3);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.5);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.3);
-            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5); 
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.3);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.5);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.3);

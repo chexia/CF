@@ -151,7 +151,7 @@ namespace CF
             StreamReader reader = File.OpenText(testPath);
             List<double[]> points = new List<double[]>();
 
-            reader.Close();
+            reader.Close(); 
             Console.WriteLine("Check 1");
             Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
             Console.WriteLine("check 2");
