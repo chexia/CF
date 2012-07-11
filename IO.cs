@@ -70,7 +70,24 @@ namespace CF
             //Tester.ABTest(10000, 100000, 5000000, ir+"test_processed.log", ir+"train_processed_2.log",ir+"705 ab results\\", 0, 1);
             //Console.WriteLine(a.GetHashCode());
             //Console.WriteLine(b.GetHashCode());
-            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small.log", "jac_result.txt", 0.5);
+
+            //aggregateStats(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", "about_10000_" );
+            //return;
+            //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.7); 
+            //LNK.LNKtest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5);
+
+            //return;
+            //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5, 5, 0.3);
+
+            //aggregateStats(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", "about_10000_*.txt.txt");
+            /*
+            for (double threshold =0.5; threshold< 1; threshold +=0.1)
+                for (int neighbors =1; neighbors < 10; neighbors +=1)
+                    for (double confidence = 0; confidence< 0.5; confidence += 0.05)
+                        JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", threshold, neighbors, confidence);
+            return;
+            */
+            /*
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small.log", "jac_result.txt", 0.3);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.5);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.3);
@@ -78,15 +95,16 @@ namespace CF
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.3);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.5);
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_small_lq.log", "jac_result.txt", 0.3);
+             * */
             //manReader("train_processed.");
 
 
 
             //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\", 0, 1);
-            return;
+            //return;
 
-            //aggregateStats(10000, 68500, 500);
+
             //manReader("test_processed.log");
             //reduceTrain("train_processed.log", "test_processed.log", "train_processed_2.log");
 
@@ -97,7 +115,7 @@ namespace CF
             //Tester.ABTest_c(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click2\\",0, 1);
 
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            Tester.ABTest_h(10000, 20000, 500, 10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
+            Tester.ABTest_h(10000, 20000, 500, 0, 10, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
             return;
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
@@ -293,16 +311,17 @@ namespace CF
         }
 
 
-        public static void aggregateStats(int s, int e, int step, string inputPrefix)
+        public static void aggregateStats(int s, int e, int step, string inputPrefix, string fileName = "about_*.txt")
         {
             Dictionary<double, double>[] threshold_count = new Dictionary<double, double>[10];
             //string inputPrefix = "705 ab results\\";
+            string[] fn = fileName.Split(new char[] { '*' });
             for (int k = 1; k < 10; k++)
             {
                 threshold_count[k] = new Dictionary<double, double>();
                 for (int i = s; i <= e; i += step)
                 {
-                    string inputPath = inputPrefix + "about_" + i + ".txt.txt";
+                    string inputPath = inputPrefix + fn[0] + i + fn[1];
                     StreamReader reader = new StreamReader(inputPath);
                     string line = reader.ReadLine();
 
@@ -322,7 +341,7 @@ namespace CF
                     }
                     reader.Close();
                 }
-                string outputPath = inputPrefix + "aggregated_stat_" + (0.1 * k) + ".txt";
+                string outputPath = inputPrefix + "aggregated_stats_" + (0.1 * k) + ".txt";
                 StreamWriter writer = File.CreateText(outputPath);
                 foreach (double key in threshold_count[k].Keys)
                 {
