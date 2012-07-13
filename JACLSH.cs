@@ -78,7 +78,7 @@ namespace CF
 
             Console.WriteLine("test 2: truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
             StreamWriter writer = new StreamWriter(outputPath, true);
-            //writer.WriteLine("test 2: truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}", final[0], final[1], final[2], final[3], threshold, inputData);
+            writer.WriteLine("test 2: truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}", final[0], final[1], final[2], final[3], threshold, inputData);
             writer.Close();
         }
 
@@ -103,7 +103,7 @@ namespace CF
                                         Double trueVal = testMat.get(intent, user);
                                         Double predictedVal = filter.predict(intent, user, false, threshold, neighbors, confidence);
                                         if (Double.IsNaN(predictedVal))
-                                            continue;
+                                            predictedVal=0;
                                         if (trueVal == predictedVal && trueVal == 1)
                                             stats[0]++;
                                         else if (trueVal == predictedVal && trueVal == 0)
@@ -112,7 +112,7 @@ namespace CF
                                             stats[3]++;
                                         else
                                             stats[2]++;
-                                        Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", stats[0], stats[1], stats[2], stats[3]);
+                                        //Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", stats[0], stats[1], stats[2], stats[3]);
                                     }
                                     return stats;
                                 },
@@ -717,10 +717,9 @@ namespace CF
                 sum2 += 1;
             }
             double rtn = overlapSum / (sum1 + sum2 - overlapSum);
+
             if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
                 rtn = 0;
-            if (rtn < 0)
-                sum1 = 1;
             return rtn;
         }
 

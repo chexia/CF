@@ -35,18 +35,22 @@ namespace CF
 
         private void processCol(int col)
         {
-            Console.WriteLine(col);
+            //Console.WriteLine(col);
             foreach (int row in testPoints.getRowsOfCol(col))
             {
                 double APE;
                 double trueVal = testPoints.get(row, col);
                 double predictedVal = filter.predict(row, col);
-                if (trueVal == 0)
-                    continue;
+
                 if (double.IsNaN(predictedVal))
                     APE = 1;
                 else
                     APE = Math.Abs(predictedVal - trueVal) / (trueVal);
+                if (trueVal == 0)
+                {
+                    //continue;
+                    APE = 1;
+                }
                 lock (writer)
                 {
                     writer.WriteLine(APE);
@@ -60,7 +64,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int req = s; req <= e; req += step)
@@ -90,9 +94,9 @@ namespace CF
                 Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                 CF filter = new CF(utilMat);
-                Console.WriteLine("check 4");
                 Tester tester = new Tester(filter, testPts);
                 tester.abtest(outputPrefix + "about_" + req + ".txt");
+                
                 reader.Close();
             }
 
@@ -106,7 +110,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int req = s; req <= e; req += step)
@@ -136,7 +140,6 @@ namespace CF
                 Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                 CF filter = new CF(utilMat);
-                Console.WriteLine("check 4");
                 Tester tester = new Tester(filter, testPts);
                 tester.abtest(outputPrefix + "about_" + req + ".txt");
                 reader.Close();
@@ -153,13 +156,14 @@ namespace CF
 
             reader.Close(); 
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, 0, 1);
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int vreq = s; vreq <= e; vreq += step)
             {
                 for (int creq = s2; creq <= e2; creq += step2)
                 {
+                    int numvalidentries = 0;
                     reader = File.OpenText(string.Format(trainPath));
                     points = new List<double[]>();
                     LogEnum logenum = new LogEnum(trainPath);
@@ -180,14 +184,15 @@ namespace CF
                         maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
                         maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
                         points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                        numvalidentries += 1;
                     }
                     Console.WriteLine("Check 3");
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
-                    Console.WriteLine("check 4");
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
                     reader.Close();
                 }
             }

@@ -118,6 +118,11 @@ namespace CF
             }
             if (!this.utilMat.hashMap.ContainsKey(col))
                 return double.NaN;
+            if (this.utilMat.contains(row, col))
+            {
+                throw new Exception("training set test set overlap");
+                return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
+            }
             Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, 5);
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;

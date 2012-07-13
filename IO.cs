@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Collections;
 using System.Threading.Tasks;
+using Wintellect.PowerCollections;
 
 namespace CF
 {
@@ -74,17 +75,18 @@ namespace CF
             //aggregateStats(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", "about_10000_" );
             //return;
             //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.7); 
-            //LNK.LNKtest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5);
-
+            //LNK.LNKtest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result_2.txt", 0.5);
+            //return;
             //return;
             //JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5, 5, 0.3);
 
-            //aggregateStats(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", "about_10000_*.txt.txt");
+            //aggregateStats(0, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", "about_15000_*.txt.txt");
+            //return;
             /*
             for (double threshold =0.5; threshold< 1; threshold +=0.1)
                 for (int neighbors =1; neighbors < 10; neighbors +=1)
                     for (double confidence = 0; confidence< 0.5; confidence += 0.05)
-                        JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", threshold, neighbors, confidence);
+                        JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result.txt", threshold, neighbors, confidence);
             return;
             */
             /*
@@ -113,10 +115,36 @@ namespace CF
             //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log");
             //Tester.ABTest_h(10000, 30000, 1000, 10, 50, 5, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid\\", 0, 1);
             //Tester.ABTest_c(10, 50, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click2\\",0, 1);
-
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
-            Tester.ABTest_h(10000, 20000, 500, 0, 10, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
+            //aggregateStats(0, 6, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", "about_11500_*.txt.txt");
+            /*
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\davc_test_using_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\davc_train_using_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
+            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log");
+            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", 1, 0);
+            //Tester.ABTest_h(11500, 20000, 500, 0, 8, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", 1, 0);
             return;
+            */
+            //manReader("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_0.log");
+            //aggregateStats(10000, 100000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", "about_*_0.txt.txt");
+            //return;
+            //parseTest("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_0.log");
+            //return;
+            /*
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5_enlarged.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed6.log");
+            Tester.ABTest_h(5501, 9501, 500, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed6.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
+            return;
+            
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_00.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed5.log");
+            Tester.ABTest_h(7000, 9500, 500, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
+            return;
+            */
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
+            Tester.ABTest_h(24001, 100000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", 0, 1);
+            return;
+            // hybrid2 generated using train0 and test0
+            //hybrid3 generated using train5 and test5
+            //test 0 and train 5 give interesting results
+
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed2.log");
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
             split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed2.log");
@@ -145,7 +173,28 @@ namespace CF
             Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split\\", 0, 1);
 
         }
-
+        public static void parseTest(string inputData)
+        {
+            LogEnum logenum = new LogEnum(inputData);
+            HashSet<string> intent = new HashSet<string>();
+            HashSet<string> ad = new HashSet<string>();
+            StreamWriter writer = new StreamWriter("tmp.txt");
+            MultiDictionary<string, double> output = new MultiDictionary<string, double>(true);
+            foreach (string line in logenum)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                intent.Add(tokens[0]);
+                ad.Add(tokens[1]);
+                output.Add(tokens[1], Double.Parse(tokens[3]) / Double.Parse(tokens[2]));
+                
+            }
+            foreach (string key in output.Keys)
+                foreach (double val in output[key])
+                    writer.WriteLine(key + "\t" + val);
+            Console.WriteLine(intent.Count);
+            Console.WriteLine(ad.Count);
+            writer.Close();
+        }
         public static void split(string inputData, string out_test = "jac_test.log", string out_train = "jac_train.log")
         {
             LogEnum logenum = new LogEnum(inputData);

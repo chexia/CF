@@ -15,14 +15,14 @@ namespace CF
         private double[,] B;
         private double[,] C;
 
-        public static void LNKtest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int numrec = 10)
+        public static void LNKtest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int numrec = 3)
         {
             int[] ui = JACtest.cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
-            JACtest.split("jac_usi_processed.log");
-            JACMatrix testMat = JACtest.makeUtilMat(ui[0], ui[1], "jac_test.log");
+            //JACtest.split("jac_usi_processed.log");
+            JACMatrix testMat = JACtest.makeUtilMat(ui[0], ui[1], "jac_test.log", 0, 2);
             LNK trainLNK = makeLNK(ui[0], ui[1], "jac_train.log");
-            trainLNK.iterate(20);
+            trainLNK.iterate(10);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<MultiDictionary<double, int>>(0, ui[0],
                     () => new MultiDictionary<double, int>(true),
@@ -54,7 +54,7 @@ namespace CF
                          int user = stats[100000].First();
                          foreach (int intent in stats.Values.ToArray<int>())
                          {
-                             double trueVal = testMat.get(intent, user);
+                             double trueVal = testMat.get(user, intent);
                              double predictedVal = 1;
 
                              if (trueVal == predictedVal && trueVal == 1)
@@ -105,6 +105,9 @@ namespace CF
             // initialize A
             foreach (double[] point in points)
             {
+                int bbb = 0;
+                if (point[0] == 37 && point[1] == 17)
+                    bbb = 1;
                 A[(int)point[0], (int)point[1]] = point[2];
             }
 
@@ -157,6 +160,11 @@ namespace CF
             Console.WriteLine("beginning iteration");
             for (int iteration = 0; iteration < iterations; iteration++)
             {
+                double a3717 = A[37, 17];
+                double b3717 = B[37, 17];
+                double c3717 = C[17, 37];
+                double cr3737 = Cr[37, 37];
+                double pr3717 = Pr[37, 17];
                 Console.WriteLine("iteration {0}", iteration);
                 double[,] tmp = new double[Pr.GetLength(0), Pr.GetLength(1)];
                 mul(Cr, B, tmp);
@@ -205,7 +213,7 @@ namespace CF
             {
                 for (int j = 0; j < a.GetLength(1); j++)
                 {
-                    c[i, j] = 0.5* a[i, j] + 0.5 * b[i, j];
+                    c[i, j] = a[i, j] +  b[i, j];
                     //Console.WriteLine(c[i, j]);
                 }
             }
