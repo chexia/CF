@@ -60,8 +60,24 @@ namespace CF
             //Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
-
-
+        // does not take row into consideration
+        public int[] allCandidates(int col)
+        {
+            HashSet<int> candidates = new HashSet<int>();
+            for (int bandInd = 0; bandInd < b; bandInd++)
+            {
+                int hashCode = sigMat[bandInd][col];
+                ICollection<int> neighbors = revSigMat[bandInd][hashCode];
+                foreach (int i in neighbors)
+                {
+                    candidates.Add(i);
+                }
+            }
+            if (candidates.Contains(col))
+                candidates.Remove(col);
+            //Console.WriteLine(candidates.Count);
+            return candidates.ToArray<int>();
+        }
 
         /* computes r*b random vectors which act as locality-sensitive functions.
          * @arguments: vecLen is the length of a single random vector

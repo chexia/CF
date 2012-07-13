@@ -57,6 +57,37 @@ namespace CF
                 }
             }
         }
+        public static void speedTest(int req, string trainPath)
+        {
+
+            StreamReader reader = File.OpenText(string.Format(trainPath));
+            List<double[]> points = new List<double[]>();
+            LogEnum logenum = new LogEnum(trainPath);
+            int maxRow = 0;
+            int maxCol = 0;
+            foreach (string line in logenum)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double clicks = 0;
+                double views = 0;
+                clicks = Double.Parse(tokens[3]);
+                views = Double.Parse(tokens[2]);
+                if (views < req)
+                    continue;
+                maxRow = Math.Max(maxRow, int.Parse(tokens[0]));
+                maxCol = Math.Max(maxCol, int.Parse(tokens[1]));
+                points.Add(new double[3] { Double.Parse(tokens[0]), Double.Parse(tokens[1]), Math.Min(clicks, views) / views });
+            }
+            Console.WriteLine("Check 3");
+            Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+
+            CF filter = new CF(utilMat);
+            filter.buildModelL();
+
+            reader.Close();
+
+            Console.Write("debug: completed speed");
+        }
         public static void ABTest_c(int s, int e, int step, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
             StreamReader reader = File.OpenText(testPath);

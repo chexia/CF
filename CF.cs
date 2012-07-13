@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using Wintellect.PowerCollections;
+using System.Threading.Tasks;
 
 namespace CF
 {
@@ -12,7 +13,121 @@ namespace CF
     {
         public Matrix utilMat;
         public LSH myLSH;
+        private Matrix predictionResults;
 
+        public void buildModel(int k=5)
+        {
+            predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
+            Parallel.For<Matrix>(0, utilMat.GetLength(1),
+                () => {
+                    Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
+                    return rtn;
+                },
+                (col, state, local) =>
+                {
+                    if (!utilMat.hashMap.ContainsKey((int)col))
+                        return local;
+                    local.set(1, 1, col);
+                    int[] neighbors = this.myLSH.allCandidates((int)col);
+                    double[] simScores = this.utilMat.sim((int)col, neighbors);
+                    Array.Sort<double, int>(simScores, neighbors);
+                    Array.Reverse(simScores);
+                    Array.Reverse(neighbors);
+
+                    for (int row = 0; row < utilMat.GetLength(0); row++)
+                    {
+                        if (utilMat.contains(row, (int)col))
+                            continue;
+                        int[] kneighbors = new int[k];
+                        double[] kscores = new double[k];
+                        int i = 0;
+                        for (int ind = 0; ind < neighbors.Length; ind++)
+                        {
+                            int colAtInd = neighbors[ind];
+                            if (utilMat.contains(row, colAtInd))
+                            {
+                                kneighbors[i] = neighbors[ind];
+                                kscores[i] = simScores[ind];
+                                i++;
+                                if (i == k)
+                                    break;
+                            }
+                        }
+                        double sum = 0;
+                        double denom = 0;
+                        for (int j = 0; j < i; j++)
+                        {
+                            sum += utilMat.get(row, kneighbors[j]) * kscores[j];
+                            denom += kscores[j];
+                        }
+                        if (!Double.IsNaN(sum/denom))
+                            local.set(row, (int)col, sum / denom);
+                    }
+                    return local;
+                },
+                (local) =>
+                {
+                    int col=(int)local.get(1,1);
+                    lock (utilMat)
+                    {
+                        foreach (int row in utilMat.getRowsOfCol(col))
+                            utilMat.set(row, col, local.get(row,0));
+                    }
+                }
+            );
+                
+
+        }
+
+        public void buildModelL(int k=5)
+        {
+            predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
+            int progress = 0;
+            int total = utilMat.getCols().Count();
+            for (int col = 0; col < utilMat.GetLength(1); col++)
+            {
+                if (!utilMat.hashMap.ContainsKey(col))
+                    continue;
+
+                progress++;
+                Console.WriteLine("progress:{0}", (double)progress/(double)total);
+
+                int[] neighbors = this.myLSH.allCandidates(col);
+                double[] simScores = this.utilMat.sim(col, neighbors);
+                Array.Sort<double, int>(simScores, neighbors);
+                Array.Reverse(simScores);
+                Array.Reverse(neighbors);
+
+                for (int row = 0; row < utilMat.GetLength(0); row++)
+                {
+                    if (utilMat.contains(row,col))
+                        continue;
+                    int[] kneighbors = new int[k];
+                    double[] kscores = new double[k];
+                    int i = 0;
+                    for (int ind = 0; ind < neighbors.Length; ind++)
+                    {
+                        int colAtInd = neighbors[ind];
+                        if (utilMat.contains(row, colAtInd))
+                        {
+                            kneighbors[i] = neighbors[ind];
+                            kscores[i] = simScores[ind];
+                            i++;
+                            if (i == k)
+                                break;
+                        }
+                    }
+                    double sum = 0;
+                    double denom = 0;
+                    for (i = 0; i < k; i++)
+                    {
+                        sum += utilMat.get(row, kneighbors[i]) * kscores[i];
+                        denom += kscores[i];
+                    }
+                    utilMat.set(row, col, sum / denom);
+                }
+            }
+        }
 
         public CF(Matrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true)
         {
