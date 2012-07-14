@@ -32,6 +32,7 @@ namespace CF
                     Console.WriteLine("progress:{0}", (double)progress / (double)total);
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
+                    local.set(-1, 0, 1);
                     int[] neighbors = this.myLSH.allCandidates((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);

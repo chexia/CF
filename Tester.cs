@@ -27,12 +27,42 @@ namespace CF
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
             Parallel.ForEach<int>(testPoints.hashMap.Keys, act);
+            //Parallel.ForEach<int, List<double>>(testPoints.hashMap.Keys, () => new List<double>(), processCol2, aggregateResult);
             //foreach (int key in testPoints.mat.hashMap.Keys)
             //    act(key);
             writer.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
         }
+        private List<double> processCol2(int col, ParallelLoopState useless, List<double> local )
+        {
+            //Console.WriteLine(col);
+            foreach (int row in testPoints.getRowsOfCol(col))
+            {
+                double APE;
+                double trueVal = testPoints.get(row, col);
+                double predictedVal = filter.predict(row, col);
 
+                if (double.IsNaN(predictedVal))
+                    APE = 1;
+                else
+                    APE = Math.Abs(predictedVal - trueVal) / (trueVal);
+                if (trueVal == 0)
+                {
+                    //continue;
+                    APE = 1;
+                }
+                local.Add(APE);
+            }
+            return local;
+        }
+        private void aggregateResult(List<double> local)
+        {
+            lock (writer)
+            {
+                foreach (double toWrite in local)
+                    writer.WriteLine(toWrite);
+            }
+        }
         private void processCol(int col)
         {
             //Console.WriteLine(col);
