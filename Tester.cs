@@ -82,7 +82,7 @@ namespace CF
             Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
             CF filter = new CF(utilMat);
-            filter.buildModelL();
+            filter.buildModel();
 
             reader.Close();
 

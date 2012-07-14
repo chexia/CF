@@ -18,6 +18,8 @@ namespace CF
         public void buildModel(int k=5)
         {
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
+            int progress = 0;
+            int total = utilMat.GetLength(1);
             Parallel.For<Matrix>(0, utilMat.GetLength(1),
                 () => {
                     Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
@@ -25,9 +27,11 @@ namespace CF
                 },
                 (col, state, local) =>
                 {
+                    local.set(1, 1, col);
+                    progress++;
+                    Console.WriteLine("progress:{0}", (double)progress / (double)total);
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
-                    local.set(1, 1, col);
                     int[] neighbors = this.myLSH.allCandidates((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);
@@ -70,8 +74,12 @@ namespace CF
                     int col=(int)local.get(1,1);
                     lock (utilMat)
                     {
-                        foreach (int row in utilMat.getRowsOfCol(col))
-                            utilMat.set(row, col, local.get(row,0));
+                        if (local.hashMap.ContainsKey(0))
+                            foreach (int row in local.getRowsOfCol(0))
+                                predictionResults.set(row, col, local.get(row, 0));
+                        else
+                            if (utilMat.hashMap.ContainsKey(col))
+                                throw new Exception("bla");
                     }
                 }
             );
