@@ -285,6 +285,7 @@ namespace CF
     class JACCF
     {
         public JACMatrix utilMat;
+        
         public JACLSH myLSH;
 
 

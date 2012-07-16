@@ -251,6 +251,7 @@ namespace CF
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
+                    filter.buildModel();
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
                     Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);

@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Collections;
 using System.Threading.Tasks;
 using Wintellect.PowerCollections;
-
+using Accord.Statistics.Analysis;
 namespace CF
 {
     class IO
@@ -130,7 +130,46 @@ namespace CF
             //return;
             //Tester.speedTest(1000000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
             //return;
+            /*
+            for (int i = 10000; i < 100000; i += 500)
+            {
+                string inFile = "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\" + "about_" + i + ".txt.txt";
+                string outFile = "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\" + "about_" + i + "_0.txt.txt";
+                File.Move(inFile, outFile);
+            }
+            
+            return;
+            */
+            PCA.foo();
+            return;
+            double[,] sourceMatrix = 
+            {
+                { 2.5,  2.4 },
+                { 0.5,  0.7 },
+                { 2.2,  2.9 },
+                { 1.9,  2.2 },
+                { 3.1,  3.0 },
+                { 2.3,  2.7 },
+                { 2.0,  1.6 },
+                { 1.0,  1.1 },
+                { 1.5,  1.6 },
+                { 1.1,  0.9 }
+            };
+            var pca = new PrincipalComponentAnalysis(sourceMatrix);
+            pca.Compute();
+            double[,] components = pca.Transform(sourceMatrix, 1);
+            //Console.WriteLine(pca.GetNumberOfComponents(0.95f));
+            Console.WriteLine(components[9, 0]);
+            Console.WriteLine(sourceMatrix[9, 0]);
 
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log");
+            Tester.ABTest_h(2000, 5000, 3000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid6\\", 0, 1);
+
+            return;
+
+            aggregateStats(500, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", "about_*_0.txt.txt", "aggregated_stats_");
+            return;
             
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_10000_100.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_100_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed7.log");
             Tester.ABTest_h(1000, 30000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid5\\", 0, 1);
@@ -367,7 +406,7 @@ namespace CF
         }
 
 
-        public static void aggregateStats(int s, int e, int step, string inputPrefix, string fileName = "about_*.txt")
+        public static void aggregateStats(int s, int e, int step, string inputPrefix, string fileName = "about_*.txt", string outName = "aggregated_stats_")
         {
             Dictionary<double, double>[] threshold_count = new Dictionary<double, double>[10];
             //string inputPrefix = "705 ab results\\";
@@ -397,7 +436,7 @@ namespace CF
                     }
                     reader.Close();
                 }
-                string outputPath = inputPrefix + "aggregated_stats_" + (0.1 * k) + ".txt";
+                string outputPath = inputPrefix + outName + (0.1 * k) + ".txt";
                 StreamWriter writer = File.CreateText(outputPath);
                 foreach (double key in threshold_count[k].Keys)
                 {

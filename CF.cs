@@ -244,9 +244,11 @@ namespace CF
                 return double.NaN;
             if (this.utilMat.contains(row, col))
             {
-                throw new Exception("training set test set overlap");
+                //throw new Exception("training set test set overlap");
                 return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
             }
+            if (this.predictionResults != null && this.predictionResults.contains(row, col))
+                return this.predictionResults.get(row, col);
             Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, 5);
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
