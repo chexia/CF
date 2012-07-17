@@ -9,6 +9,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using Wintellect.PowerCollections;
 using Accord.Statistics.Analysis;
+using System.Diagnostics;
 namespace CF
 {
     class IO
@@ -139,8 +140,8 @@ namespace CF
             }
             
             return;
-            */
-            PCA.foo();
+            
+            
             return;
             double[,] sourceMatrix = 
             {
@@ -163,8 +164,47 @@ namespace CF
             Console.WriteLine(sourceMatrix[9, 0]);
 
             return;
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log");
-            Tester.ABTest_h(2000, 5000, 3000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid6\\", 0, 1);
+             * */
+            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log");
+            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log");
+            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
+
+            StreamWriter writer = new StreamWriter("timing Info");
+            System.Timers.Timer aTimer = new System.Timers.Timer();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            Tester.ABTest_hl(10000, 10000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            sw.Stop();
+            double ExecutionTimeTaken = sw.Elapsed.TotalMilliseconds;
+            Console.WriteLine(ExecutionTimeTaken);
+            writer.WriteLine("linear time: {0}", ExecutionTimeTaken);
+
+            sw.Reset();
+            sw.Start();
+            Tester.ABTest_h(10000, 10000, 10000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            sw.Stop();
+            ExecutionTimeTaken = sw.Elapsed.TotalMilliseconds;
+            Console.WriteLine(ExecutionTimeTaken);
+            writer.WriteLine("parallel time: {0}", ExecutionTimeTaken);
+            writer.Close();
+                       
+            
+            Tester.ABTest_h(20000, 30000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+
+            for (double threshold = 0.3; threshold < 5; threshold += 0.1)
+                for (int neighbors = 3; neighbors < 6; neighbors += 1)
+                    for (double confidence = 0; confidence < 0.5; confidence += 0.05)
+                        for (double preserve = 0.8; preserve < 1; preserve += 0.5)
+                            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result_PCA.txt", threshold, neighbors, confidence, preserve);
+            return;
+            
+            PCA.foo();
+            return;
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.3, 5, 0.3);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_1000.log", "jac_result.txt", 0.3);
+            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.5);
+            string tmp = Console.ReadLine();
+            return;
 
             return;
 

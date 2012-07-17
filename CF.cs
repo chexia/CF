@@ -18,8 +18,6 @@ namespace CF
         public void buildModel(int k=5)
         {
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
-            int progress = 0;
-            int total = utilMat.GetLength(1);
             Parallel.For<Matrix>(0, utilMat.GetLength(1),
                 () => {
                     Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
@@ -28,11 +26,9 @@ namespace CF
                 (col, state, local) =>
                 {
                     local.set(1, 1, col);
-                    progress++;
-                    Console.WriteLine("progress:{0}", (double)progress / (double)total);
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
-                    local.set(-1, 0, 1);
+                    //local.set(-1, 0, 1);
                     int[] neighbors = this.myLSH.allCandidates((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);
@@ -75,12 +71,12 @@ namespace CF
                     int col=(int)local.get(1,1);
                     lock (utilMat)
                     {
-                        if (local.hashMap.ContainsKey(0))
+                        if (local.hashMap.ContainsKey(0)) 
                             foreach (int row in local.getRowsOfCol(0))
                                 predictionResults.set(row, col, local.get(row, 0));
-                        else
-                            if (utilMat.hashMap.ContainsKey(col))
-                                throw new Exception("bla");
+                        //else
+                        //    if (utilMat.hashMap.ContainsKey(col))
+                        //        throw new Exception("bla");
                     }
                 }
             );
@@ -91,15 +87,10 @@ namespace CF
         public void buildModelL(int k=5)
         {
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
-            int progress = 0;
-            int total = utilMat.getCols().Count();
             for (int col = 0; col < utilMat.GetLength(1); col++)
             {
                 if (!utilMat.hashMap.ContainsKey(col))
                     continue;
-
-                progress++;
-                Console.WriteLine("progress:{0}", (double)progress/(double)total);
 
                 int[] neighbors = this.myLSH.allCandidates(col);
                 double[] simScores = this.utilMat.sim(col, neighbors);
@@ -128,12 +119,13 @@ namespace CF
                     }
                     double sum = 0;
                     double denom = 0;
-                    for (i = 0; i < k; i++)
+                    for (int j = 0; j < i; j++)
                     {
-                        sum += utilMat.get(row, kneighbors[i]) * kscores[i];
-                        denom += kscores[i];
+                        sum += utilMat.get(row, kneighbors[j]) * kscores[j];
+                        denom += kscores[j];
                     }
-                    utilMat.set(row, col, sum / denom);
+                    if (!Double.IsNaN(sum / denom))
+                        predictionResults.set(row, (int)col, sum / denom);
                 }
             }
         }

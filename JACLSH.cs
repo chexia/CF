@@ -81,15 +81,14 @@ namespace CF
             writer.WriteLine("test 2: truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}", final[0], final[1], final[2], final[3], threshold, inputData);
             writer.Close();
         }
-
-        public static void jacSplitTest(string inputData, string outputPath="jac_result.txt", double threshold=0.5, int neighbors = 5, double confidence =0) 
+        public static void jacSplitTest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int neighbors = 5, double confidence = 0, double preserve=0.8)
         {
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log"); 
+            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
             JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
-            JACCF filter = new JACCF(traintMat, false, 5, 10, false);
+            JACCF filter = new JACCF(traintMat, false, 5, 10, false, preserve);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<int[]>(0, ui[0],
                                 () => new int[4] { 0, 0, 0, 0 },
@@ -103,7 +102,7 @@ namespace CF
                                         Double trueVal = testMat.get(intent, user);
                                         Double predictedVal = filter.predict(intent, user, false, threshold, neighbors, confidence);
                                         if (Double.IsNaN(predictedVal))
-                                            predictedVal=0;
+                                            predictedVal = 0;
                                         if (trueVal == predictedVal && trueVal == 1)
                                             stats[0]++;
                                         else if (trueVal == predictedVal && trueVal == 0)
@@ -132,6 +131,8 @@ namespace CF
             writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0]/(final[0]+final[2]), (double)final[0]/(final[0]+final[3]));
             writer.Close();
         }
+
+        #region utility methods
 
         /*
         public static void jacSplitTest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5) 
@@ -280,26 +281,30 @@ namespace CF
             JACMatrix utilMat = new JACMatrix(rowNum, colNum, points);
             return utilMat;
         }
+        #endregion
     }
+        
+    #region JACCF
     [Serializable()]
     class JACCF
     {
         public JACMatrix utilMat;
-        
+        public JACMatrix simMat;
         public JACLSH myLSH;
 
 
-        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true)
+        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve=0.8)
         {
             this.utilMat = utilMat;
             if (norm)
                 utilMat.normalize();
             if (usingLSH)
                 this.myLSH = new JACLSH(utilMat, r, b, this);
+            this.simMat = PCA.dmR(utilMat, preserve);
 
         }
 
-
+        #region prediction code
         private int[] allCandidates(int col, int row)
         {
             if (this.myLSH == null)
@@ -328,7 +333,7 @@ namespace CF
                 for (i = 0; i < allCandidates.Length; i++)
                 {
                     rtn.Item1[i] = allCandidates[i];
-                    rtn.Item2[i] = utilMat.jacSim(principal, allCandidates[i]);// *utilMat.jacSim(principal, allCandidates[i]); investivate merits
+                    rtn.Item2[i] = simMat.jacSim(principal, allCandidates[i]);// *utilMat.jacSim(principal, allCandidates[i]); investigate merits
                 }
                 for (; i < k; i++)
                 {
@@ -341,7 +346,7 @@ namespace CF
             }
             else
             {
-                double[] cosSim = utilMat.sim(principal, allCandidates);
+                double[] cosSim = simMat.sim(principal, allCandidates);
                 Array.Sort(cosSim, allCandidates); //important, bad implementation right here, will want to optimize later
                 for (int i = 0; i < k; i++)
                 {
@@ -385,6 +390,8 @@ namespace CF
             return rtn;
 
         }
+        #endregion
+
         public double predict(int row, int col, bool noEstimate = false, double threshold=0.5, int neighbors=10, double confidence =0, bool round=true)
         {
             if (noEstimate)
@@ -393,7 +400,7 @@ namespace CF
                     return Double.NaN;//throw new Exception("cannot predict without estimate");
                 return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
             }
-            if (!this.utilMat.mat.hashMap.ContainsKey(col))
+            if (!this.utilMat.hashMap.ContainsKey(col))
                 return double.NaN;
             Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, neighbors);
             int[] kneighbors = ns.Item1;
@@ -405,32 +412,10 @@ namespace CF
                 return double.NaN;
             return rtn<threshold?0:1;
         }
-        public void iterate(int iterations)
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                for (int row = 0; row < utilMat.GetLength(0); row++)
-                {
-                    for (int col = 0; col < utilMat.GetLength(1); col++)
-                    {
-                        Tuple<int[], double[]> ns = kNearestNeighbors(col, row, 5);
-                        double maxConfidence = Double.MinValue;
-                        for (int ind = 0; ind < 5; ind++)
-                        {
-                            if (ns.Item2[ind] > maxConfidence)
-                                maxConfidence = ns.Item2[ind];
-                        }
-                        if (maxConfidence < 0.7)
-                            continue;
-                        if (utilMat.get(row, col) != -1)
-                            utilMat.set(row, col, (utilMat.get(row, col) + predict(ns.Item1, ns.Item2, row, col)) / 2);
-                        else
-                            utilMat.set(row, col, predict(ns.Item1, ns.Item2, row, col));
-                    }
-                }
-            }
-        }
     }
+    #endregion 
+
+    #region JACLSH
     [Serializable()]
     class JACLSH
     {
@@ -557,141 +542,26 @@ namespace CF
 
         }
     }
+    #endregion
+
+    #region JACMatrix
     [Serializable()]
-    class JACPointMatrix
+    class JACMatrix : Matrix
     {
 
-        public Dictionary<int, Dictionary<int, double>> hashMap;
-        private int colnum, rownum;
-        private double nullRtn;
-        public JACPointMatrix(int rownum, int colnum, double nullRtn)
+        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0) : base(numRow, numCol, points)
         {
-            this.rownum = rownum;
-            this.colnum = colnum;
-            this.hashMap = new Dictionary<int, Dictionary<int, double>>();
-            colnum = rownum = 0;
-        }
-        public double get(int row, int col)
-        {
-            if (!hashMap.ContainsKey(col))
-                return nullRtn;
-            if (!(hashMap[col].ContainsKey(row)))
-                return nullRtn;
-            return hashMap[col][row];
-        }
-        public void set(int row, int col, double value)
-        {
-            if (!hashMap.ContainsKey(col))
-                hashMap.Add(col, new Dictionary<int, double>());
-            hashMap[col][row] = value;
-        }
-        public int GetLength(int dim)
-        {
-            if (dim == 0)
-                return rownum;
-            else
-                return colnum;
-        }
-        public bool contains(int row, int col)
-        {
-            if (!hashMap.ContainsKey(col))
-                return false;
-            if (!(hashMap[col].ContainsKey(row)))
-                return false;
-            return true;
-        }
-
-    }
-    [Serializable()]
-    class JACMatrix
-    {
-
-
-        public double[] setAvg;
-        public double[] setDev;
-        public JACPointMatrix mat;
-        private double nullRtn;
-        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0)
-        {
-            setAvg = new double[numCol];
-            setDev = new double[numCol];
-            this.nullRtn = nullRtn;
-            for (int i = 0; i < numCol; i++)
-            {
-                setDev[i] = 1;
-            }
-            mat = new JACPointMatrix(numRow, numCol, nullRtn);
-            if (points != null)
-            {
-                foreach (double[] point in points)
-                {
-                    int rowInd = (int)point[0];
-                    int colInd = (int)point[1];
-                    mat.set(rowInd, colInd, point[2]);
-                }
-            }
         }
 
         public double get(int rowInd, int colInd)
         {
-            return mat.get(rowInd, colInd);
+            return base.get(rowInd, colInd)==1?1:0;
         }
         public void set(int rowInd, int colInd, double value)
         {
-            mat.set(rowInd, colInd, value);
-        }
-        public int GetLength(int dim)
-        {
-            return mat.GetLength(dim);
-        }
-        public int[] getRowsOfCol(int col)
-        {
-            if (!this.mat.hashMap.ContainsKey(col))
-                return null;
-            return this.mat.hashMap[col].Keys.ToArray<int>();
-        }
-        public bool contains(int row, int col)
-        {
-            return this.mat.contains(row, col);
-        }
-        /* Takes in a matrix of doubles and normalizes each column in place,
-         * such that each column sums to 1. "-1's" denote unknown entries and
-         * are left alone.
-         * @arguments: a matrix of doubles to be normalized in place
-         * @return: a vector of doubles, such that return[k] = average value of
-         * kth column in utilMat BEFORE normalization
-         */
-        public void normalize()
-        {
-            int rowCount = mat.GetLength(0);
-            int colCount = mat.GetLength(1);
-            for (int col = 0; col < colCount; col++)
-            {
-                double sum = 0;
-                double sqsum = 0;
-                double seenCount = 0;
-                for (int row = 0; row < rowCount; row++)
-                {
-                    {
-                        sqsum += Math.Pow(mat.get(row, col), 2);
-                        sum += mat.get(row, col);
-                        seenCount++;
-                    }
-                }
-                double avg = (double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount;
-                double std = (double.IsNaN(Math.Sqrt(sqsum / seenCount))) ? 0 : Math.Sqrt(sqsum / seenCount);
-                setAvg[col] = avg;
-                setDev[col] = std;
-                for (int row = 0; row < rowCount; row++)
-                {
-                    if (mat.get(row, col) == nullRtn)
-                        continue;
-                    else
-                    {
-                        mat.set(row, col, (mat.get(row, col) - avg) / std);
-                    }
-                }
-            }
+            if (value != 1 && value != 0)
+                throw new Exception("only 1");
+            base.set(rowInd, colInd, value);
         }
 
 
@@ -705,15 +575,15 @@ namespace CF
             double overlapSum = 0;
             double sum1 = 0;
             double sum2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.mat.hashMap.ContainsKey(colInd1) || !this.mat.hashMap.ContainsKey(colInd2))
+            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
                 return 0;
-            foreach (int row in this.mat.hashMap[colInd1].Keys)
+            foreach (int row in this.hashMap[colInd1].Keys)
             {
                 sum1 += 1;
-                if (mat.hashMap[colInd2].ContainsKey(row))
+                if (hashMap[colInd2].ContainsKey(row))
                     overlapSum += 1;
             }
-            foreach (int row in this.mat.hashMap[colInd2].Keys)
+            foreach (int row in this.hashMap[colInd2].Keys)
             {
                 sum2 += 1;
             }
@@ -739,23 +609,7 @@ namespace CF
             }
             return rtn;
         }
-
-        public HashSet<int> randomSubset(int k, int dim)
-        {
-            Random rand = new Random();
-            double size = this.GetLength(dim);
-            double constSize = this.GetLength(dim);
-            HashSet<int> rtn = new HashSet<int>();
-            for (int i = 0; i < constSize; i++)
-            {
-                if (rand.NextDouble() < (double)k / size)
-                {
-                    rtn.Add(i);
-                    k -= 1;
-                }
-                size -= 1;
-            }
-            return rtn;
-        }
     }
+    #endregion
+
 }

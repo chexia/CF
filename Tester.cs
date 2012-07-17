@@ -259,7 +259,58 @@ namespace CF
                 }
             }
 
-            Console.Write("debug: completed AB");
+            Console.WriteLine("debug: completed AB");
+        }
+        public static void ABTest_hl(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
+        {
+            StreamReader reader = File.OpenText(testPath);
+            List<double[]> points = new List<double[]>();
+
+            reader.Close();
+            Console.WriteLine("Check 1");
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Console.WriteLine("check 2");
+
+            for (int vreq = s; vreq <= e; vreq += step)
+            {
+                for (int creq = s2; creq <= e2; creq += step2)
+                {
+                    int numvalidentries = 0;
+                    reader = File.OpenText(string.Format(trainPath));
+                    points = new List<double[]>();
+                    LogEnum logenum = new LogEnum(trainPath);
+                    int maxRow = 0;
+                    int maxCol = 0;
+                    foreach (string line in logenum)
+                    {
+                        string[] tokens = line.Split(new char[] { '\t' });
+                        double clicks = 0;
+                        double views = 0;
+                        if (valPos == -1)
+                        {
+                            clicks = Double.Parse(tokens[3]);
+                            views = Double.Parse(tokens[2]);
+                        }
+                        if (views < vreq || clicks < creq)
+                            continue;
+                        maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
+                        maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
+                        points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                        numvalidentries += 1;
+                    }
+                    Console.WriteLine("Check 3");
+                    Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+
+                    CF filter = new CF(utilMat);
+                    filter.buildModelL();
+                    Tester tester = new Tester(filter, testPts);
+                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
+                    reader.Close();
+                }
+            }
+
+            Console.WriteLine("debug: completed AB");
         }
         public static void blockTest(string in_mavc, string in_msi, string in_iavc)
         {
