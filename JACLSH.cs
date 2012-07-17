@@ -564,12 +564,12 @@ namespace CF
             base.set(rowInd, colInd, value);
         }
 
-
+        
         /* Computes additional similarity score based on amount of overlap between two columns, similar in idea to Jaccard Distance
          * @arguments: column indices of two columns to be compared
          * @return: a double that represents the similarity score
          */
-
+        /*
         public double jacSim(int colInd1, int colInd2)
         {
             double overlapSum = 0;
@@ -593,10 +593,11 @@ namespace CF
                 rtn = 0;
             return rtn;
         }
-
+        */
         /* Overloaded cosineSim for an entire array of columns to compare with a principal column
          * returns an array of similarity scores
          */
+        /*
         public double[] sim(int principal, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
@@ -609,6 +610,7 @@ namespace CF
             }
             return rtn;
         }
+         * */
     }
     #endregion
 

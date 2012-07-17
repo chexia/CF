@@ -166,8 +166,7 @@ namespace CF
             return;
              * */
             //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log");
-            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log");
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
+            /*
 
             StreamWriter writer = new StreamWriter("timing Info");
             System.Timers.Timer aTimer = new System.Timers.Timer();
@@ -187,9 +186,10 @@ namespace CF
             Console.WriteLine(ExecutionTimeTaken);
             writer.WriteLine("parallel time: {0}", ExecutionTimeTaken);
             writer.Close();
-                       
+                                   
             
             Tester.ABTest_h(20000, 30000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            */
 
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)

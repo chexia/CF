@@ -42,7 +42,7 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allCandidates(int col, int principalRow)
+        public int[] allNeighbors(int col, int principalRow)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -61,7 +61,7 @@ namespace CF
             return candidates.ToArray<int>();
         }
         // does not take row into consideration
-        public int[] allCandidates(int col)
+        public int[] allNeighbors(int col)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)

@@ -29,7 +29,7 @@ namespace CF
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
                     //local.set(-1, 0, 1);
-                    int[] neighbors = this.myLSH.allCandidates((int)col);
+                    int[] neighbors = this.myLSH.allNeighbors((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);
                     Array.Reverse(simScores);
@@ -92,7 +92,7 @@ namespace CF
                 if (!utilMat.hashMap.ContainsKey(col))
                     continue;
 
-                int[] neighbors = this.myLSH.allCandidates(col);
+                int[] neighbors = this.myLSH.allNeighbors(col);
                 double[] simScores = this.utilMat.sim(col, neighbors);
                 Array.Sort<double, int>(simScores, neighbors);
                 Array.Reverse(simScores);
@@ -155,7 +155,7 @@ namespace CF
             }
             else
             {
-                return this.myLSH.allCandidates(col, row);
+                return this.myLSH.allNeighbors(col, row);
             }
         }
         public Tuple<int[], double[]> kNearestNeighbors(int principal, int row, int k)
