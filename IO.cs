@@ -188,15 +188,14 @@ namespace CF
             writer.Close();
                                    
             */
-            Tester.ABTest_h(10000, 30000, 10000, -5, -5, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
-            Tester.ABTest_hl(10000, 30000, 10000, -6, -6, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
-            return;
+            //Tester.ABTest_h(10000, 10000, 10000, -2, -2, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            //return;
             
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
-                    for (double confidence = 0.3; confidence < 1; confidence += 0.05)
+                    for (double confidence = 0; confidence < 0.5; confidence += 0.05)
                         for (double preserve = 0.95; preserve < 1; preserve += 0.5)
-                            JACtest.jacSplitTestL("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result_PCA.txt", threshold, neighbors, confidence, preserve);
+                            JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result_PCA.txt", threshold, neighbors, confidence, preserve);
             return;
             
             PCA.foo();
