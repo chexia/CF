@@ -27,33 +27,8 @@ namespace CF
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
             Parallel.ForEach<int>(testPoints.hashMap.Keys, act);
-            //Parallel.ForEach<int, List<double>>(testPoints.hashMap.Keys, () => new List<double>(), processCol2, aggregateResult);
-            //foreach (int key in testPoints.mat.hashMap.Keys)
-            //    act(key);
             writer.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
-        }
-        private List<double> processCol2(int col, ParallelLoopState useless, List<double> local )
-        {
-            //Console.WriteLine(col);
-            foreach (int row in testPoints.getRowsOfCol(col))
-            {
-                double APE;
-                double trueVal = testPoints.get(row, col);
-                double predictedVal = filter.predict(row, col);
-
-                if (double.IsNaN(predictedVal))
-                    APE = 1;
-                else
-                    APE = Math.Abs(predictedVal - trueVal) / (trueVal);
-                if (trueVal == 0)
-                {
-                    //continue;
-                    APE = 1;
-                }
-                local.Add(APE);
-            }
-            return local;
         }
         private void aggregateResult(List<double> local)
         {
@@ -125,7 +100,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Matrix testPts = LogProcess.makeUtilMat(testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int req = s; req <= e; req += step)
@@ -164,51 +139,6 @@ namespace CF
             Console.Write("debug: completed AB");
         }
 
-        public static void ABTest(int s, int e, int step, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
-        {
-            StreamReader reader = File.OpenText(testPath);
-            List<double[]> points = new List<double[]>();
-
-            reader.Close();
-            Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
-            Console.WriteLine("check 2");
-
-            for (int req = s; req <= e; req += step)
-            {
-                reader = File.OpenText(string.Format(trainPath));
-                points = new List<double[]>();
-                LogEnum logenum = new LogEnum(trainPath);
-                int maxRow = 0;
-                int maxCol = 0;
-                foreach (string line in logenum)
-                {
-                    string[] tokens = line.Split(new char[] { '\t' });
-                    double clicks = 0;
-                    double views = 0;
-                    if (valPos == -1)
-                    {
-                        clicks = Double.Parse(tokens[3]);
-                        views = Double.Parse(tokens[2]);
-                    }
-                    if (views < req)
-                        continue;
-                    maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
-                    maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
-                    points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
-                }
-                Console.WriteLine("Check 3");
-                Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
-
-                CF filter = new CF(utilMat);
-                Tester tester = new Tester(filter, testPts);
-                tester.abtest(outputPrefix + "about_" + req + ".txt");
-                reader.Close();
-            }
-
-            Console.Write("debug: completed AB");
-        }
-
 
         public static void ABTest_h(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
@@ -217,7 +147,7 @@ namespace CF
 
             reader.Close(); 
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Matrix testPts = LogProcess.makeUtilMat(testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int vreq = s; vreq <= e; vreq += step)
@@ -268,7 +198,7 @@ namespace CF
 
             reader.Close();
             Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Matrix testPts = LogProcess.makeUtilMat(testPath, rowPos, colPos);
             Console.WriteLine("check 2");
 
             for (int vreq = s; vreq <= e; vreq += step)
@@ -302,7 +232,7 @@ namespace CF
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
-                    filter.buildModelL();
+                    //filter.buildModelL();
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
                     Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
@@ -311,38 +241,6 @@ namespace CF
             }
 
             Console.WriteLine("debug: completed AB");
-        }
-        public static void blockTest(string in_mavc, string in_msi, string in_iavc)
-        {
-            int[] mia = LogProcess.cleanLogs0(in_mavc, in_msi, in_iavc);
-            Console.WriteLine("mia:{0}, {1}, {2}", mia[0], mia[1], mia[2]);
-            //int[] mia = new int[3] { 448397, 274, 2462 };
-
-            Matrix ad_muid_view = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 2);
-            Matrix ad_muid_click = LogProcess.makeUtilMat(mia[1], mia[0], "mavc_processed.log", 1, 0, 3);
-            Matrix intent_muid = LogProcess.makeUtilMat(mia[1], mia[0], "msi_processed.log", 2, 0, 1);
-            Matrix intent_ad = LogProcess.makeUtilMat(mia[1], mia[2], "iavc_processed.log", 0, 1, -1);
-            CF filter = new CF(intent_ad);
-
-            Console.WriteLine("check 1");
-            StreamWriter writer = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\blocktest\\blockTestOutput.txt");
-            Parallel.For(1, 200, numAdi =>
-            {
-                int numAd = numAdi * 5;
-                for (int numUsr = 10; numUsr <= 5000; numUsr += 10)
-                {
-                    testFixedBlock(numUsr, numAd, ad_muid_click, ad_muid_view, intent_muid, filter, writer);
-                }
-            });
-            /*
-            for (int numAd = 10; numAd <=100; numAd += 10)
-            {
-                for (int numUsr = 50; numUsr <= 1000; numUsr += 50)
-                {
-                    double APE = testFixedBlock(numUsr, numAd, ad_muid_click, ad_muid_view, intent_muid, filter);
-                }
-            }
-             * */
         }
 
 
@@ -441,8 +339,6 @@ namespace CF
             int principalIntent = 0;
             double principalScore = double.MinValue;
 
-            double ctrSum = 0;
-            double denom = 0;
 
             foreach (int intent in intent_muid.hashMap[user].Keys)
             {

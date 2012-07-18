@@ -187,14 +187,14 @@ namespace CF
             writer.WriteLine("parallel time: {0}", ExecutionTimeTaken);
             writer.Close();
                                    
-            
-            Tester.ABTest_h(20000, 30000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
             */
-
+            //Tester.ABTest_h(10000, 10000, 10000, -2, -2, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            //return;
+            
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
                     for (double confidence = 0; confidence < 0.5; confidence += 0.05)
-                        for (double preserve = 0.8; preserve < 1; preserve += 0.5)
+                        for (double preserve = 0.95; preserve < 1; preserve += 0.5)
                             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result_PCA.txt", threshold, neighbors, confidence, preserve);
             return;
             
@@ -237,7 +237,7 @@ namespace CF
             //Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
 
             //return;
-            Tester.ABTest(10001, 10001, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", 0, 1);
+            //Tester.ABTest(10001, 10001, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", 0, 1);
             //aggregateStats(10, 200, 2, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\click\\");
             return;
 
@@ -328,7 +328,7 @@ namespace CF
 
         public static void reduceTrain(string inputTrain, string inputTest, string outputTrain)
         {
-            Matrix testMatrix = LogProcess.makeUtilMat(1000, 100000, inputTest, 0, 1);
+            Matrix testMatrix = LogProcess.makeUtilMat(inputTest, 0, 1);
             LogEnum logenum = new LogEnum(inputTrain);
             StreamWriter writer = File.CreateText(outputTrain);
             foreach (string line in logenum)

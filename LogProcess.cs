@@ -74,11 +74,12 @@ namespace CF
         }
 
 
-        public static Matrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 1, int colPos = 0, int valPos = -1)
+        public static Matrix makeUtilMat(string inputFilePath, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
             List<double[]> points = new List<double[]>();
             LogEnum logenum = new LogEnum(inputFilePath);
-            rowNum = colNum = 0;
+            int rowNum = 0;
+            int colNum = 0;
             foreach (string line in logenum)
             {
                 string[] tokens = line.Split(new char[] { '\t' });

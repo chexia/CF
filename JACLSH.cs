@@ -18,9 +18,9 @@ namespace CF
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
-            JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
-            JACCF filter = new JACCF(traintMat, false, 5, 10, false);
+            ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
+            ZOCF filter = new ZOCF(traintMat, false, 5, 10, false);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<MultiDictionary<double,int>>(0, ui[0],
                                 () => new MultiDictionary<double,int>(true),
@@ -86,21 +86,19 @@ namespace CF
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
-            JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
-            JACCF filter = new JACCF(traintMat, false, 5, 10, false, preserve);
+            ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
+            ZOCF filter = new ZOCF(traintMat, false, 5, 10, false, preserve);
+            filter.buildModel(neighbors, confidence);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<int[]>(0, ui[0],
                                 () => new int[4] { 0, 0, 0, 0 },
                                 (user, state, stats) =>
                                 {
                                     for (int intent = 0; intent < ui[1]; intent += 1)
-                                    //if (!testMat.mat.hashMap.ContainsKey(user))
-                                    //    return stats;
-                                    //foreach (int intent in testMat.mat.hashMap[user].Keys)
                                     {
                                         Double trueVal = testMat.get(intent, user);
-                                        Double predictedVal = filter.predict(intent, user, false, threshold, neighbors, confidence);
+                                        Double predictedVal = filter.predict(intent, user, false, threshold, neighbors);
                                         if (Double.IsNaN(predictedVal))
                                             predictedVal = 0;
                                         if (trueVal == predictedVal && trueVal == 1)
@@ -111,7 +109,6 @@ namespace CF
                                             stats[3]++;
                                         else
                                             stats[2]++;
-                                        //Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", stats[0], stats[1], stats[2], stats[3]);
                                     }
                                     return stats;
                                 },
@@ -128,7 +125,7 @@ namespace CF
 
             Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
             StreamWriter writer = new StreamWriter(outputPath, true);
-            writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0]/(final[0]+final[2]), (double)final[0]/(final[0]+final[3]));
+            writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}\t preserve:{10}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0]/(final[0]+final[2]), (double)final[0]/(final[0]+final[3]), preserve);
             writer.Close();
         }
 
@@ -262,7 +259,7 @@ namespace CF
             }
             writer.Close();
         }
-        public static JACMatrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 2, int colPos = 0, int valPos = 1)
+        public static ZOMatrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 2, int colPos = 0, int valPos = 1)
         {
             List<double[]> points = new List<double[]>();
             LogEnum logenum = new LogEnum(inputFilePath);
@@ -278,340 +275,12 @@ namespace CF
                     point[2] = Double.Parse(tokens[valPos]);
                 points.Add(point);
             }
-            JACMatrix utilMat = new JACMatrix(rowNum, colNum, points);
+            ZOMatrix utilMat = new ZOMatrix(rowNum, colNum, points);
             return utilMat;
         }
         #endregion
     }
         
-    #region JACCF
-    [Serializable()]
-    class JACCF
-    {
-        public JACMatrix utilMat;
-        public JACMatrix simMat;
-        public JACLSH myLSH;
 
-
-        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve=0.8)
-        {
-            this.utilMat = utilMat;
-            if (norm)
-                utilMat.normalize();
-            if (usingLSH)
-                this.myLSH = new JACLSH(utilMat, r, b, this);
-            this.simMat = PCA.dmR(utilMat, preserve);
-
-        }
-
-        #region prediction code
-        private int[] allCandidates(int col, int row)
-        {
-            if (this.myLSH == null)
-            {
-                List<int> candidates = new List<int>(); ;
-                for (int i = 0; i < utilMat.GetLength(1); i++)
-                {
-                    if (utilMat.get(row, i) != -1 && i != col)
-                        candidates.Add(i);
-                }
-                return candidates.ToArray();
-            }
-            else
-            {
-                return this.myLSH.allCandidates(col, row);
-            }
-        }
-        public Tuple<int[], double[]> kNearestNeighbors(int principal, int row, int k)
-        {
-            Tuple<int[], double[]> rtn = new Tuple<int[], double[]>(new int[k], new double[k]);
-            int[] allCandidates = this.allCandidates(principal, row);
-            int len = allCandidates.Length;
-            if (len < k)
-            {
-                int i;
-                for (i = 0; i < allCandidates.Length; i++)
-                {
-                    rtn.Item1[i] = allCandidates[i];
-                    rtn.Item2[i] = simMat.jacSim(principal, allCandidates[i]);// *utilMat.jacSim(principal, allCandidates[i]); investigate merits
-                }
-                for (; i < k; i++)
-                {
-                    rtn.Item1[i] = -1;
-                    rtn.Item2[i] = 0;
-                }
-                Array.Sort(rtn.Item2, rtn.Item1);
-                Array.Reverse(rtn.Item2);
-                Array.Reverse(rtn.Item1);
-            }
-            else
-            {
-                double[] cosSim = simMat.sim(principal, allCandidates);
-                Array.Sort(cosSim, allCandidates); //important, bad implementation right here, will want to optimize later
-                for (int i = 0; i < k; i++)
-                {
-                    rtn.Item1[i] = allCandidates[len - 1 - i];
-                    rtn.Item2[i] = cosSim[len - 1 - i];
-                }
-            }
-            return rtn;
-        }
-        public double predict(int[] kneighbors, double[] ksimMeasure, int row, int col, double confidence = 0)
-        {
-            if (this.utilMat.get(row, col) != -1)
-            {
-                //return this.utilMat.get(row, col);
-            }
-            double rtn = 0;
-            double sum = 0;
-            double normalization_factor = 0;
-            for (int i = 0; i < kneighbors.Length; i++)
-            {
-                if (kneighbors[i] == -1)
-                    continue;
-                if (utilMat.get(row, kneighbors[i]) == -1)
-                    continue;
-                double a = utilMat.get(row, kneighbors[i]);
-                double b = ksimMeasure[i];
-                if (b < confidence)
-                    continue;
-
-                sum += utilMat.get(row, kneighbors[i]) * ksimMeasure[i];//important, consider using square
-                normalization_factor += Math.Abs(ksimMeasure[i]); //important, think harder about this later.
-            }
-
-            rtn = sum / normalization_factor;
-            if (double.IsNaN(rtn))
-            {
-                return Double.NaN;
-            }
-
-            rtn = rtn * utilMat.setDev[col] + utilMat.setAvg[col];
-            return rtn;
-
-        }
-        #endregion
-
-        public double predict(int row, int col, bool noEstimate = false, double threshold=0.5, int neighbors=10, double confidence =0, bool round=true)
-        {
-            if (noEstimate)
-            {
-                if (!this.utilMat.contains(row, col))
-                    return Double.NaN;//throw new Exception("cannot predict without estimate");
-                return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
-            }
-            if (!this.utilMat.hashMap.ContainsKey(col))
-                return double.NaN;
-            Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, neighbors);
-            int[] kneighbors = ns.Item1;
-            double[] ksimMeasure = ns.Item2;
-            double rtn = this.predict(kneighbors, ksimMeasure, row, col, confidence);
-            if (!round)
-                return rtn;
-            if (Double.IsNaN(rtn))
-                return double.NaN;
-            return rtn<threshold?0:1;
-        }
-    }
-    #endregion 
-
-    #region JACLSH
-    [Serializable()]
-    class JACLSH
-    {
-        private int numSets;
-        private int r, b;
-        private Dictionary<int, int>[] sigMat; //gets hash value from column
-        private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
-        private JACCF filter;
-        private Random randGen = new Random();
-        public JACLSH(JACMatrix utilMat, int r, int b, JACCF filter)
-        {
-            this.filter = filter;
-            this.numSets = utilMat.GetLength(1);
-            this.r = r;
-            this.b = b;
-            sigMat = new Dictionary<int, int>[b];
-            revSigMat = new MultiDictionary<int, int>[b];
-            for (int bandInd = 0; bandInd < b; bandInd++)
-            {
-                sigMat[bandInd] = new Dictionary<int, int>();
-                revSigMat[bandInd] = new MultiDictionary<int, int>(true);
-            }
-            compSigMatEntries(utilMat);
-
-        }
-
-        /* computes all candidate nearest neighbors for a particular column
-         * each column represents a set, e.g. user/page/intent node
-         * @arguments: index of column
-         */
-        public int[] allCandidates(int col, int principalRow)
-        {
-            HashSet<int> candidates = new HashSet<int>();
-            for (int bandInd = 0; bandInd < b; bandInd++)
-            {
-                int hashCode = sigMat[bandInd][col];
-                ICollection<int> neighbors = revSigMat[bandInd][hashCode];
-                foreach (int i in neighbors)
-                {
-                    if (this.filter.utilMat.get(principalRow, i) != -1)
-                        candidates.Add(i);
-                }
-            }
-            if (candidates.Contains(col))
-                candidates.Remove(col);
-            //Console.WriteLine(candidates.Count);
-            return candidates.ToArray<int>();
-        }
-
-
-
-        /* computes r*b random vectors which act as locality-sensitive functions.
-         * @arguments: vecLen is the length of a single random vector
-         */
-        private int[][] compRandVec(int vecLen)
-        {
-            int[][] rtn = new int[r][];
-            Random rand = new Random();
-            for (int i = 0; i < r; i++)//loop over array of random vectors
-            {
-                rtn[i] = new int[vecLen];
-                double[] tmp = new double[vecLen];
-                for (int j = 0; j < vecLen; j++)
-                {
-                    rtn[i][j] = j;
-                    tmp[j] = rand.NextDouble();
-                }
-                Array.Sort(tmp, rtn[i]);
-            }
-            return rtn;
-        }
-        /* produces signature matrix from original matrix, for compression purposes
-         * @arguments: takes in the original matrix
-         */
-        private void compSigMatEntries(JACMatrix utilMat)
-        {
-            int[] bandArr = new int[b];
-            for (int i = 0; i < b; i++)
-                bandArr[i] = i;
-            Parallel.For<Dictionary<int, Dictionary<int, int>>>(0, b,
-                                                                () => new Dictionary<int, Dictionary<int, int>>(),
-                                                                (bandInd, foo, sigMatLocal) =>
-                                                                {
-                                                                    sigMatLocal[bandInd] = new Dictionary<int, int>();
-                                                                    int[][] currBandRandVec = compRandVec(utilMat.GetLength(0));
-                                                                    for (int col = 0; col < this.numSets; col++)
-                                                                    {
-                                                                        string tmpHash = "";
-                                                                        for (int vecInd = 0; vecInd < r; vecInd++)
-                                                                        {
-                                                                            double result = 0;
-                                                                            for (int row = 0; row < utilMat.GetLength(0); row++)
-                                                                            {
-                                                                                int realRow = currBandRandVec[vecInd][row];
-                                                                                if (utilMat.get(realRow, col) == 1)
-                                                                                    result = realRow;
-                                                                                break;
-                                                                            }
-                                                                            tmpHash += result;
-                                                                        }
-                                                                        int hashCode = tmpHash.GetHashCode();
-                                                                        sigMatLocal[bandInd].Add(col, hashCode);
-                                                                    }
-                                                                    return sigMatLocal;
-                                                                },
-                                                                (sigMatLocal) =>
-                                                                {
-                                                                    foreach (int bandInd in sigMatLocal.Keys)
-                                                                    {
-                                                                        foreach (int colInd in sigMatLocal[bandInd].Keys)
-                                                                        {
-                                                                            lock (this.sigMat)
-                                                                            {
-                                                                                this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
-                                                                            }
-                                                                            lock (this.revSigMat)
-                                                                            {
-                                                                                this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-
-
-        }
-    }
-    #endregion
-
-    #region JACMatrix
-    [Serializable()]
-    class JACMatrix : Matrix
-    {
-
-        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0) : base(numRow, numCol, points)
-        {
-        }
-
-        public double get(int rowInd, int colInd)
-        {
-            return base.get(rowInd, colInd)==1?1:0;
-        }
-        public void set(int rowInd, int colInd, double value)
-        {
-            if (value != 1 && value != 0)
-                throw new Exception("only 1");
-            base.set(rowInd, colInd, value);
-        }
-
-        
-        /* Computes additional similarity score based on amount of overlap between two columns, similar in idea to Jaccard Distance
-         * @arguments: column indices of two columns to be compared
-         * @return: a double that represents the similarity score
-         */
-        /*
-        public double jacSim(int colInd1, int colInd2)
-        {
-            double overlapSum = 0;
-            double sum1 = 0;
-            double sum2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
-                return 0;
-            foreach (int row in this.hashMap[colInd1].Keys)
-            {
-                sum1 += 1;
-                if (hashMap[colInd2].ContainsKey(row))
-                    overlapSum += 1;
-            }
-            foreach (int row in this.hashMap[colInd2].Keys)
-            {
-                sum2 += 1;
-            }
-            double rtn = overlapSum / (sum1 + sum2 - overlapSum);
-
-            if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
-                rtn = 0;
-            return rtn;
-        }
-        */
-        /* Overloaded cosineSim for an entire array of columns to compare with a principal column
-         * returns an array of similarity scores
-         */
-        /*
-        public double[] sim(int principal, int[] neighbors)
-        {
-            double[] rtn = new double[neighbors.Length];
-            for (int i = 0; i < neighbors.Length; i++)
-            {
-                rtn[i] = this.jacSim(principal, neighbors[i]);
-                if (rtn[i] == 1)
-                    continue;
-
-            }
-            return rtn;
-        }
-         * */
-    }
-    #endregion
-
+   
 }
