@@ -13,7 +13,7 @@ namespace CF
 {
     class JACtest
     {
-        public static void jacSplitTest2(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int numrec =5)
+        public static void jacSplitTest2(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int numrec = 5)
         {
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
@@ -22,8 +22,8 @@ namespace CF
             JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
             JACCF filter = new JACCF(traintMat, false, 5, 10, false);
             int[] final = new int[4] { 0, 0, 0, 0 };
-            Parallel.For<MultiDictionary<double,int>>(0, ui[0],
-                                () => new MultiDictionary<double,int>(true),
+            Parallel.For<MultiDictionary<double, int>>(0, ui[0],
+                                () => new MultiDictionary<double, int>(true),
                                 (user, state, stats) =>
                                 {
                                     for (int intent = 0; intent < ui[1]; intent += 1)
@@ -33,7 +33,7 @@ namespace CF
                                         Double predictedVal = filter.predict(intent, (int)user, false, threshold);
                                         double[] valarr = stats.Keys.ToArray<double>();
                                         if (!stats.ContainsKey(1000))
-                                            stats.Add(1000, (int) user);
+                                            stats.Add(1000, (int)user);
                                         //Console.WriteLine(predictedVal);
                                         if (stats.Values.Count <= numrec)
                                         {
@@ -53,7 +53,7 @@ namespace CF
                                      int[] err = new int[4] { 0, 0, 0, 0 };
                                      foreach (int intent in stats.Values.ToArray<int>())
                                      {
-                                         
+
                                          int user = stats[1000].First<int>();
                                          double trueVal = testMat.get(intent, user);
                                          double predictedVal = 1;
@@ -81,7 +81,7 @@ namespace CF
             writer.WriteLine("test 2: truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}", final[0], final[1], final[2], final[3], threshold, inputData);
             writer.Close();
         }
-        public static void jacSplitTest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int neighbors = 5, double confidence = 0, double preserve=0.8)
+        public static void jacSplitTest(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int neighbors = 5, double confidence = 0, double preserve = 0.8)
         {
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
@@ -128,7 +128,7 @@ namespace CF
 
             Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
             StreamWriter writer = new StreamWriter(outputPath, true);
-            writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0]/(final[0]+final[2]), (double)final[0]/(final[0]+final[3]));
+            writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0] / (final[0] + final[2]), (double)final[0] / (final[0] + final[3]));
             writer.Close();
         }
 
@@ -175,12 +175,12 @@ namespace CF
         */
 
 
-        public static void split(string inputData, string out_test="jac_test.log", string out_train="jac_train.log")
+        public static void split(string inputData, string out_test = "jac_test.log", string out_train = "jac_train.log")
         {
             LogEnum logenum = new LogEnum(inputData);
             Random randgen = new Random();
-            StreamWriter testWriter = File.CreateText (out_test);
-            StreamWriter trainWriter = File.CreateText (out_train);
+            StreamWriter testWriter = File.CreateText(out_test);
+            StreamWriter trainWriter = File.CreateText(out_train);
             HashSet<string> seen = new HashSet<string>();
 
             HashSet<string> exclude = new HashSet<string>();
@@ -283,7 +283,7 @@ namespace CF
         }
         #endregion
     }
-        
+
     #region JACCF
     [Serializable()]
     class JACCF
@@ -293,7 +293,7 @@ namespace CF
         public JACLSH myLSH;
 
 
-        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve=0.8)
+        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve = 0.8)
         {
             this.utilMat = utilMat;
             if (norm)
@@ -392,7 +392,7 @@ namespace CF
         }
         #endregion
 
-        public double predict(int row, int col, bool noEstimate = false, double threshold=0.5, int neighbors=10, double confidence =0, bool round=true)
+        public double predict(int row, int col, bool noEstimate = false, double threshold = 0.5, int neighbors = 10, double confidence = 0, bool round = true)
         {
             if (noEstimate)
             {
@@ -410,10 +410,10 @@ namespace CF
                 return rtn;
             if (Double.IsNaN(rtn))
                 return double.NaN;
-            return rtn<threshold?0:1;
+            return rtn < threshold ? 0 : 1;
         }
     }
-    #endregion 
+    #endregion
 
     #region JACLSH
     [Serializable()]
@@ -549,13 +549,14 @@ namespace CF
     class JACMatrix : Matrix
     {
 
-        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0) : base(numRow, numCol, points)
+        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0)
+            : base(numRow, numCol, points)
         {
         }
 
         public double get(int rowInd, int colInd)
         {
-            return base.get(rowInd, colInd)==1?1:0;
+            return base.get(rowInd, colInd) == 1 ? 1 : 0;
         }
         public void set(int rowInd, int colInd, double value)
         {
@@ -569,7 +570,7 @@ namespace CF
          * @arguments: column indices of two columns to be compared
          * @return: a double that represents the similarity score
          */
-
+        /*
         public double jacSim(int colInd1, int colInd2)
         {
             double overlapSum = 0;
@@ -593,10 +594,11 @@ namespace CF
                 rtn = 0;
             return rtn;
         }
-
+        */
         /* Overloaded cosineSim for an entire array of columns to compare with a principal column
          * returns an array of similarity scores
          */
+        /*
         public double[] sim(int principal, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
@@ -609,6 +611,7 @@ namespace CF
             }
             return rtn;
         }
+         * */
     }
     #endregion
 

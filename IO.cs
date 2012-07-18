@@ -166,8 +166,7 @@ namespace CF
             return;
              * */
             //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_less_5000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed9.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed9.log");
-            split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log");
-            Tester.ABTest(10000, 200000, 500, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\train self split intersection removed\\", 0, 1);
+            /*
 
             StreamWriter writer = new StreamWriter("timing Info");
             System.Timers.Timer aTimer = new System.Timers.Timer();
@@ -187,9 +186,10 @@ namespace CF
             Console.WriteLine(ExecutionTimeTaken);
             writer.WriteLine("parallel time: {0}", ExecutionTimeTaken);
             writer.Close();
-                       
+                                   
             
             Tester.ABTest_h(20000, 30000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            */
 
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
@@ -197,7 +197,7 @@ namespace CF
                         for (double preserve = 0.8; preserve < 1; preserve += 0.5)
                             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "C:\\Users\\t-chexia\\Documents\\Visual Studio 2010\\Projects\\CF\\CF\\bin\\Debug\\JAC_result_PCA.txt", threshold, neighbors, confidence, preserve);
             return;
-            
+
             PCA.foo();
             return;
             JACtest.jacSplitTest("C:\\Users\\t-chexia\\Desktop\\usi_sample_hq_600.log", "jac_result.txt", 0.3, 5, 0.3);
@@ -210,7 +210,7 @@ namespace CF
 
             aggregateStats(500, 100000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\view\\", "about_*_0.txt.txt", "aggregated_stats_");
             return;
-            
+
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_outlierintent_removed_10000_100.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_outlierintent_removed_100_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed7.log");
             Tester.ABTest_h(1000, 30000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed7.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid5\\", 0, 1);
 
@@ -222,7 +222,7 @@ namespace CF
             Tester.ABTest_h(7000, 9500, 500, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
             Tester.ABTest_h(500, 500, 500, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid3\\", 0, 1);
             return;
-            
+
 
             //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_0.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log");
             //Tester.ABTest_h(24001, 100000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid2\\", 0, 1);
@@ -272,7 +272,7 @@ namespace CF
                 intent.Add(tokens[0]);
                 ad.Add(tokens[1]);
                 output.Add(tokens[1], Double.Parse(tokens[3]) / Double.Parse(tokens[2]));
-                
+
             }
             foreach (string key in output.Keys)
                 foreach (double val in output[key])
@@ -372,6 +372,7 @@ namespace CF
             while (line != null)
             {
                 double binNum = Math.Ceiling(Double.Parse(line) / 0.001);
+
                 if (bins.ContainsKey(binNum))
                     bins[binNum] += 1;
                 else

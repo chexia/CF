@@ -15,11 +15,12 @@ namespace CF
         public LSH myLSH;
         private Matrix predictionResults;
 
-        public void buildModel(int k=5)
+        public void buildModel(int k = 5)
         {
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
             Parallel.For<Matrix>(0, utilMat.GetLength(1),
-                () => {
+                () =>
+                {
                     Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
                     return rtn;
                 },
@@ -29,7 +30,7 @@ namespace CF
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
                     //local.set(-1, 0, 1);
-                    int[] neighbors = this.myLSH.allCandidates((int)col);
+                    int[] neighbors = this.myLSH.allNeighbors((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);
                     Array.Reverse(simScores);
@@ -61,17 +62,17 @@ namespace CF
                             sum += utilMat.get(row, kneighbors[j]) * kscores[j];
                             denom += kscores[j];
                         }
-                        if (!Double.IsNaN(sum/denom))
+                        if (!Double.IsNaN(sum / denom))
                             local.set(row, (int)col, sum / denom);
                     }
                     return local;
                 },
                 (local) =>
                 {
-                    int col=(int)local.get(1,1);
+                    int col = (int)local.get(1, 1);
                     lock (utilMat)
                     {
-                        if (local.hashMap.ContainsKey(0)) 
+                        if (local.hashMap.ContainsKey(0))
                             foreach (int row in local.getRowsOfCol(0))
                                 predictionResults.set(row, col, local.get(row, 0));
                         //else
@@ -80,11 +81,11 @@ namespace CF
                     }
                 }
             );
-                
+
 
         }
 
-        public void buildModelL(int k=5)
+        public void buildModelL(int k = 5)
         {
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
             for (int col = 0; col < utilMat.GetLength(1); col++)
@@ -92,7 +93,7 @@ namespace CF
                 if (!utilMat.hashMap.ContainsKey(col))
                     continue;
 
-                int[] neighbors = this.myLSH.allCandidates(col);
+                int[] neighbors = this.myLSH.allNeighbors(col);
                 double[] simScores = this.utilMat.sim(col, neighbors);
                 Array.Sort<double, int>(simScores, neighbors);
                 Array.Reverse(simScores);
@@ -100,7 +101,7 @@ namespace CF
 
                 for (int row = 0; row < utilMat.GetLength(0); row++)
                 {
-                    if (utilMat.contains(row,col))
+                    if (utilMat.contains(row, col))
                         continue;
                     int[] kneighbors = new int[k];
                     double[] kscores = new double[k];
@@ -155,7 +156,7 @@ namespace CF
             }
             else
             {
-                return this.myLSH.allCandidates(col, row);
+                return this.myLSH.allNeighbors(col, row);
             }
         }
         public Tuple<int[], double[]> kNearestNeighbors(int principal, int row, int k)

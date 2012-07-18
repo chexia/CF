@@ -6,7 +6,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Collections;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 
 namespace CF
 {
@@ -14,7 +14,7 @@ namespace CF
     class LogProcess
     {
         //for block test
-        public static int[] cleanLogs0 (string in_mavc, string in_msi, string in_iavc, string out_mavc = "mavc_processed.log", string out_msi = "msi_processed.log", string out_iavc = "iavc_processed.log")
+        public static int[] cleanLogs0(string in_mavc, string in_msi, string in_iavc, string out_mavc = "mavc_processed.log", string out_msi = "msi_processed.log", string out_iavc = "iavc_processed.log")
         {
             IntegerMap m2int = new IntegerMap();
             m2int.add(in_mavc, 0);
@@ -93,7 +93,8 @@ namespace CF
                 rowNum = Math.Max(rowNum, (int)point[0]);
                 colNum = Math.Max(colNum, (int)point[1]);
             }
-            Matrix utilMat = new Matrix(rowNum+1, colNum+1, points);//+1 for 0
+
+            Matrix utilMat = new Matrix(rowNum + 1, colNum + 1, points);//+1 for 0
             return utilMat;
         }
     }

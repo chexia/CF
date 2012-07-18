@@ -79,7 +79,7 @@ namespace CF
         }
 
 
-        public static LNK makeLNK (int rowNum, int colNum, string inputFilePath, int rowPos = 0, int colPos = 2, int valPos = 1)
+        public static LNK makeLNK(int rowNum, int colNum, string inputFilePath, int rowPos = 0, int colPos = 2, int valPos = 1)
         {
             List<double[]> points = new List<double[]>();
             LogEnum logenum = new LogEnum(inputFilePath);
@@ -191,29 +191,29 @@ namespace CF
             if (a.GetLength(0) != c.GetLength(0) || a.GetLength(1) != b.GetLength(0) || b.GetLength(1) != c.GetLength(1))
                 throw new ArgumentException("matrix dimensions do not match");
             Parallel.For(0, a.GetLength(0), (i) =>
+            {
+                for (int j = 0; j < b.GetLength(1); j++)
                 {
-                    for (int j = 0; j < b.GetLength(1); j++)
+                    double sum = 0;
+                    for (int k = 0; k < a.GetLength(1); k++)
                     {
-                        double sum = 0;
-                        for (int k = 0; k < a.GetLength(1); k++)
-                        {
-                            sum += a[i, k] * b[k, j];
-                        }
-                        c[i, j] = sum;
-                        //Console.WriteLine(sum);
+                        sum += a[i, k] * b[k, j];
                     }
+                    c[i, j] = sum;
+                    //Console.WriteLine(sum);
                 }
+            }
             );
         }
         private static void add(double[,] a, double[,] b, double[,] c)
         {
-            if (a.GetLength(0)!=b.GetLength(0) || a.GetLength(1)!=b.GetLength(1) ||a.GetLength(0)!=c.GetLength(0) || a.GetLength(1) !=c.GetLength(1))
+            if (a.GetLength(0) != b.GetLength(0) || a.GetLength(1) != b.GetLength(1) || a.GetLength(0) != c.GetLength(0) || a.GetLength(1) != c.GetLength(1))
                 throw new ArgumentException("matrix dimensions do not match");
             for (int i = 0; i < a.GetLength(0); i++)
             {
                 for (int j = 0; j < a.GetLength(1); j++)
                 {
-                    c[i, j] = a[i, j] +  b[i, j];
+                    c[i, j] = a[i, j] + b[i, j];
                     //Console.WriteLine(c[i, j]);
                 }
             }

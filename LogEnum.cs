@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace CF
 {
-    class LogEnum:IEnumerable<string>
+    class LogEnum : IEnumerable<string>
     {
         private string inputFilePath;
-        public LogEnum (string inputFilePath)
+        public LogEnum(string inputFilePath)
         {
             this.inputFilePath = inputFilePath;
         }
@@ -46,11 +46,11 @@ namespace CF
 
         public string Current
         {
-            get 
+            get
             {
                 if (currentStr == null)
                     throw new InvalidOperationException();
-                return currentStr; 
+                return currentStr;
             }
         }
 

@@ -33,7 +33,7 @@ namespace CF
             writer.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
         }
-        private List<double> processCol2(int col, ParallelLoopState useless, List<double> local )
+        private List<double> processCol2(int col, ParallelLoopState useless, List<double> local)
         {
             //Console.WriteLine(col);
             foreach (int row in testPoints.getRowsOfCol(col))
@@ -157,7 +157,7 @@ namespace CF
                 CF filter = new CF(utilMat);
                 Tester tester = new Tester(filter, testPts);
                 tester.abtest(outputPrefix + "about_" + req + ".txt");
-                
+
                 reader.Close();
             }
 
@@ -215,7 +215,7 @@ namespace CF
             StreamReader reader = File.OpenText(testPath);
             List<double[]> points = new List<double[]>();
 
-            reader.Close(); 
+            reader.Close();
             Console.WriteLine("Check 1");
             Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
             Console.WriteLine("check 2");

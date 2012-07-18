@@ -17,7 +17,7 @@ namespace CF
     {
         private int numSets;
         private int r, b;
-        private Dictionary<int,int>[] sigMat; //gets hash value from column
+        private Dictionary<int, int>[] sigMat; //gets hash value from column
         private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
         private CF filter;
         private Random randGen = new Random();
@@ -42,7 +42,7 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allCandidates(int col, int principalRow)
+        public int[] allNeighbors(int col, int principalRow)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -51,7 +51,7 @@ namespace CF
                 ICollection<int> neighbors = revSigMat[bandInd][hashCode];
                 foreach (int i in neighbors)
                 {
-                    if (this.filter.utilMat.get(principalRow,i)!=-1)
+                    if (this.filter.utilMat.get(principalRow, i) != -1)
                         candidates.Add(i);
                 }
             }
@@ -61,7 +61,7 @@ namespace CF
             return candidates.ToArray<int>();
         }
         // does not take row into consideration
-        public int[] allCandidates(int col)
+        public int[] allNeighbors(int col)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -85,7 +85,7 @@ namespace CF
         private int[][] compRandVec(int vecLen)
         {
             int[][] rtn = new int[r][];
-            for (int i = 0; i < r ; i++)//loop over array of random vectors
+            for (int i = 0; i < r; i++)//loop over array of random vectors
             {
                 rtn[i] = new int[vecLen];
                 for (int j = 0; j < vecLen; j++)
@@ -105,8 +105,8 @@ namespace CF
         private void compSigMatEntries(Matrix utilMat)
         {
             int[] bandArr = new int[b];
-            for (int i=0;i<b;i++)
-                bandArr[i]=i;
+            for (int i = 0; i < b; i++)
+                bandArr[i] = i;
             Parallel.For<Dictionary<int, Dictionary<int, int>>>(0, b,
                                                                 () => new Dictionary<int, Dictionary<int, int>>(),
                                                                 (bandInd, foo, sigMatLocal) =>
@@ -141,11 +141,13 @@ namespace CF
                                                                     {
                                                                         foreach (int colInd in sigMatLocal[bandInd].Keys)
                                                                         {
-                                                                            lock(this.sigMat){
-                                                                            this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
+                                                                            lock (this.sigMat)
+                                                                            {
+                                                                                this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
                                                                             }
-                                                                            lock(this.revSigMat){
-                                                                            this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
+                                                                            lock (this.revSigMat)
+                                                                            {
+                                                                                this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
                                                                             }
                                                                         }
                                                                     }
