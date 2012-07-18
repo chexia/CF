@@ -108,10 +108,11 @@ namespace CF
                 maxCol = Math.Max(maxCol, int.Parse(tokens[1]));
                 points.Add(new double[3] { Double.Parse(tokens[0]), Double.Parse(tokens[1]), Math.Min(clicks, views) / views });
             }
-            Console.WriteLine("Check 3");
+
             Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
             CF filter = new CF(utilMat);
+            Console.WriteLine("Check 3");
             filter.buildModel();
 
             reader.Close();
@@ -151,10 +152,11 @@ namespace CF
                     maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
                     points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
                 }
-                Console.WriteLine("Check 3");
+
                 Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                 CF filter = new CF(utilMat);
+                Console.WriteLine("Check 3");
                 Tester tester = new Tester(filter, testPts);
                 tester.abtest(outputPrefix + "about_" + req + ".txt");
 
@@ -247,10 +249,11 @@ namespace CF
                         points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
                         numvalidentries += 1;
                     }
-                    Console.WriteLine("Check 3");
+
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
+                    Console.WriteLine("Check 3");
                     filter.buildModel();
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
@@ -302,7 +305,7 @@ namespace CF
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat);
-                    filter.buildModelL();
+                    //filter.buildModelL();
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
                     Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);

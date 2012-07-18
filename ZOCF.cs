@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace CF
 {
     [Serializable()]
-    class CF
+    class ZOCF
     {
         public Matrix utilMat;
         public LSH myLSH;
@@ -39,36 +39,6 @@ namespace CF
 
                     for (int row = 0; row < utilMat.GetLength(0); row++)
                     {
-                        #region manual
-                        /*
-                        if (utilMat.contains(row, (int)col))
-                            continue;
-                        int[] kneighbors = new int[k];
-                        double[] kscores = new double[k];
-                        int i = 0;
-                        for (int ind = 0; ind < neighbors.Length; ind++)
-                        {
-                            int colAtInd = neighbors[ind];
-                            if (utilMat.contains(row, colAtInd))
-                            {
-                                kneighbors[i] = neighbors[ind];
-                                kscores[i] = simScores[ind];
-                                i++;
-                                if (i == k)
-                                    break;
-                            }
-                        }
-                        double sum = 0;
-                        double denom = 0;
-                        for (int j = 0; j < i; j++)
-                        {
-                            sum += utilMat.get(row, kneighbors[j]) * kscores[j];
-                            denom += kscores[j];
-                        }
-                        double prediction = sum / denom;
-                         * */
-                        #endregion
-
                         Double prediction = this.predict(neighbors, simScores, row, col, 5);
                         if (!Double.IsNaN(prediction))
                             local.set(row, 0, prediction);
@@ -143,7 +113,7 @@ namespace CF
             }
         }
         */
-        public CF(Matrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true)
+        public ZOCF(Matrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true)
         {
             this.utilMat = utilMat;
             if (norm)
@@ -167,7 +137,7 @@ namespace CF
             }
             else
                 allNeighbors = this.myLSH.allNeighbors(col);
-            
+
             // done extracting allNeighbors, now compute similarity
 
             double[] neighborScores = this.utilMat.sim(col, allNeighbors);
@@ -187,7 +157,7 @@ namespace CF
             {
                 List<int> candidates = new List<int>();
                 for (int i = 0; i < utilMat.GetLength(1); i++)
-                    if (utilMat.contains(row,i) && i != col)
+                    if (utilMat.contains(row, i) && i != col)
                         candidates.Add(i);
                 allNeighbors = candidates.ToArray();
             }
@@ -210,11 +180,11 @@ namespace CF
             double rtn = 0;
             double sum = 0;
             double normalization_factor = 0;
-            for (int i = 0, j=0; i < neighbors.Length && j<k; i++)
+            for (int i = 0, j = 0; i < neighbors.Length && j < k; i++)
             {
                 int ncol = neighbors[i];
                 if (ncol == -1)
-                    throw new Exception ("should not have -1 as neighbor ind");
+                    throw new Exception("should not have -1 as neighbor ind");
                 if (!utilMat.contains(row, ncol))
                     continue;
                 else

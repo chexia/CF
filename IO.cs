@@ -190,6 +190,10 @@ namespace CF
             
             Tester.ABTest_h(20000, 30000, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
             */
+            //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log");
+            //Tester.ABTest_h(10000, 10000, 10000, -1,-1,1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
+
+            Tester.ABTest_h(10000, 10000, 10000, -8, -8, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
 
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
@@ -499,6 +503,57 @@ namespace CF
         }
 
     }
+    [Serializable()]
+    class IntegerMap
+    {
+        private int count = 0;
+        private Dictionary<string, int> mapper;
+        private Dictionary<int, string> revmapper;
+        public IntegerMap()
+        {
+            revmapper = new Dictionary<int, string>();
+            mapper = new Dictionary<string, int>();
+        }
+        public void add(string inputFilePath, int pos)
+        {
+            LogEnum logenum = new LogEnum(inputFilePath);
+            List<double[]> points = new List<double[]>();
+            double numEntries = 0;
+            foreach (string line in logenum)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                this.add(tokens[pos]);
+                numEntries += 1;
+            }
+        }
+        public void add(string newItem)
+        {
+            if (!mapper.ContainsKey(newItem))
+            {
+                revmapper.Add(count, newItem);
+                mapper.Add(newItem, count);
+                count++;
+            }
+        }
+        public bool contains(string key)
+        {
+            return mapper.ContainsKey(key);
+        }
+        public int get(string key)
+        {
+            return mapper[key];
+        }
+        public int getCount()
+        {
+            return count;
+        }
+        public string getItemByInt(int x)
+        {
+            return revmapper[x];
+        }
+
+    }
+
 
 
 

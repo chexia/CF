@@ -42,25 +42,6 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allNeighbors(int col, int principalRow)
-        {
-            HashSet<int> candidates = new HashSet<int>();
-            for (int bandInd = 0; bandInd < b; bandInd++)
-            {
-                int hashCode = sigMat[bandInd][col];
-                ICollection<int> neighbors = revSigMat[bandInd][hashCode];
-                foreach (int i in neighbors)
-                {
-                    if (this.filter.utilMat.get(principalRow, i) != -1)
-                        candidates.Add(i);
-                }
-            }
-            if (candidates.Contains(col))
-                candidates.Remove(col);
-            //Console.WriteLine(candidates.Count);
-            return candidates.ToArray<int>();
-        }
-        // does not take row into consideration
         public int[] allNeighbors(int col)
         {
             HashSet<int> candidates = new HashSet<int>();
@@ -70,6 +51,7 @@ namespace CF
                 ICollection<int> neighbors = revSigMat[bandInd][hashCode];
                 foreach (int i in neighbors)
                 {
+                    //if (this.filter.utilMat.get(principalRow, i) != -1)
                     candidates.Add(i);
                 }
             }
@@ -78,6 +60,26 @@ namespace CF
             //Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
+        public int[] allNeighbors(int col, int row)
+        {
+            HashSet<int> candidates = new HashSet<int>();
+            for (int bandInd = 0; bandInd < b; bandInd++)
+            {
+                int hashCode = sigMat[bandInd][col];
+                ICollection<int> neighbors = revSigMat[bandInd][hashCode];
+                foreach (int i in neighbors)
+                {
+                    if (this.filter.utilMat.contains(row,i))
+                        candidates.Add(i);
+                }
+            }
+            if (candidates.Contains(col))
+            candidates.Remove(col);
+            //Console.WriteLine(candidates.Count);
+            return candidates.ToArray<int>();
+        }
+        // does not take row into consideration
+
 
         /* computes r*b random vectors which act as locality-sensitive functions.
          * @arguments: vecLen is the length of a single random vector
@@ -121,7 +123,7 @@ namespace CF
                                                                             double result = 0;
                                                                             for (int row = 0; row < utilMat.GetLength(0); row++)
                                                                             {
-                                                                                if (utilMat.get(row, col) == -1)
+                                                                                if (utilMat.contains(row,col))
                                                                                     continue;
                                                                                 result += currBand[vecInd][row] * utilMat.get(row, col);
                                                                             }

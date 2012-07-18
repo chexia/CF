@@ -333,7 +333,7 @@ namespace CF
                 for (i = 0; i < allCandidates.Length; i++)
                 {
                     rtn.Item1[i] = allCandidates[i];
-                    rtn.Item2[i] = simMat.jacSim(principal, allCandidates[i]);// *utilMat.jacSim(principal, allCandidates[i]); investigate merits
+                    rtn.Item2[i] = simMat.sim(principal, allCandidates[i]);// *utilMat.jacSim(principal, allCandidates[i]); investigate merits
                 }
                 for (; i < k; i++)
                 {
@@ -511,8 +511,10 @@ namespace CF
                                                                             {
                                                                                 int realRow = currBandRandVec[vecInd][row];
                                                                                 if (utilMat.get(realRow, col) == 1)
+                                                                                {
                                                                                     result = realRow;
-                                                                                break;
+                                                                                    break;
+                                                                                }
                                                                             }
                                                                             tmpHash += result;
                                                                         }
