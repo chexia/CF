@@ -297,15 +297,13 @@ namespace CF
         /* Overloaded cosineSim for an entire array of columns to compare with a principal column
          * returns an array of similarity scores
          */
-
+        
         public override double[] sim(int principal, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
             for (int i = 0; i < neighbors.Length; i++)
             {
                 rtn[i] = this.jacSim(principal, neighbors[i]);
-                if (rtn[i] == 1)
-                    continue;
 
             }
             return rtn;

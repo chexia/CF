@@ -89,7 +89,7 @@ namespace CF
             ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
             ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
             ZOCF filter = new ZOCF(traintMat, false, 5, 10, false, preserve);
-            filter.buildModel(neighbors, confidence);
+            //filter.buildModel(neighbors, confidence);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<int[]>(0, ui[0],
                                 () => new int[4] { 0, 0, 0, 0 },
@@ -98,7 +98,7 @@ namespace CF
                                     for (int intent = 0; intent < ui[1]; intent += 1)
                                     {
                                         Double trueVal = testMat.get(intent, user);
-                                        Double predictedVal = filter.predict(intent, user, false, threshold, neighbors);
+                                        Double predictedVal = filter.predict(intent, user, false, threshold, neighbors, true);
                                         if (Double.IsNaN(predictedVal))
                                             predictedVal = 0;
                                         if (trueVal == predictedVal && trueVal == 1)
@@ -126,6 +126,39 @@ namespace CF
             Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
             StreamWriter writer = new StreamWriter(outputPath, true);
             writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}\t preserve:{10}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0]/(final[0]+final[2]), (double)final[0]/(final[0]+final[3]), preserve);
+            writer.Close();
+        }
+        public static void jacSplitTestL(string inputData, string outputPath = "jac_result.txt", double threshold = 0.5, int neighbors = 5, double confidence = 0, double preserve = 0.8)
+        {
+            int[] ui = cleanLogsj(inputData);
+            Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
+            split("jac_usi_processed.log");
+            ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
+            ZOCF filter = new ZOCF(traintMat, false, 5, 10, false, preserve);
+            filter.buildModel(neighbors, confidence);
+            int[] final = new int[4] { 0, 0, 0, 0 };
+            for (int user = 0; user< ui[0]; user++){
+                for (int intent = 0; intent < ui[1]; intent += 1)
+                {
+                    Double trueVal = testMat.get(intent, user);
+                    Double predictedVal = filter.predict(intent, user, false, threshold, neighbors, true);
+                    if (Double.IsNaN(predictedVal))
+                        predictedVal = 0;
+                    if (trueVal == predictedVal && trueVal == 1)
+                        final[0]++;
+                    else if (trueVal == predictedVal && trueVal == 0)
+                        final[1]++;
+                    else if (trueVal == 1)
+                        final[3]++;
+                    else
+                        final[2]++;
+                }
+            };
+
+            Console.WriteLine("truePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}", final[0], final[1], final[2], final[3]);
+            StreamWriter writer = new StreamWriter(outputPath, true);
+            writer.WriteLine("precision:{8}\trecall:{9}\ttruePos:{0}\ttrueNeg:{1}\tfalsePos:{2}\tfalseNeg:{3}\tthreshold:{4}\tfile:{5}\tneighbors:{6}\tconfidence:{7}\t preserve:{10}", final[0], final[1], final[2], final[3], threshold, inputData, neighbors, confidence, (double)final[0] / (final[0] + final[2]), (double)final[0] / (final[0] + final[3]), preserve);
             writer.Close();
         }
 
