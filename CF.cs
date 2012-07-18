@@ -12,14 +12,11 @@ namespace CF
     class CF
     {
         public Matrix utilMat;
-        public LSH myLSH; //supposedly COSLSH
-        protected Matrix predictionResults;
-        
-        #region offline model construction
-        public virtual void buildModel(int k=5)
+        public LSH myLSH;
+        private Matrix predictionResults;
+
+        public void buildModel(int k=5)
         {
-            double total = this.utilMat.getCols().Count();
-            double progress = 0;
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
             Parallel.For<Matrix>(0, utilMat.GetLength(1),
                 () => {
@@ -31,11 +28,8 @@ namespace CF
                     local.set(1, 1, col);
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
-                    progress++;
-                    Console.WriteLine("progress: {0}", progress / total);
                     //local.set(-1, 0, 1);
-                    
-                    int[] neighbors = this.myLSH.allNeighbors((int)col);
+                    int[] neighbors = this.myLSH.allCandidates((int)col);
                     double[] simScores = this.utilMat.sim((int)col, neighbors);
                     Array.Sort<double, int>(simScores, neighbors);
                     Array.Reverse(simScores);
@@ -45,12 +39,6 @@ namespace CF
                     {
                         if (utilMat.contains(row, (int)col))
                             continue;
-                        /*
-                        double prediction = this.predict(row, col);
-                        if (!Double.IsNaN(prediction))
-                            local.set(row, (int)col, prediction);
-                        */
-                        
                         int[] kneighbors = new int[k];
                         double[] kscores = new double[k];
                         int i = 0;
@@ -59,16 +47,13 @@ namespace CF
                             int colAtInd = neighbors[ind];
                             if (utilMat.contains(row, colAtInd))
                             {
-                                kneighbors[i] = colAtInd;
+                                kneighbors[i] = neighbors[ind];
                                 kscores[i] = simScores[ind];
                                 i++;
                                 if (i == k)
                                     break;
                             }
                         }
-                        
-
-                        
                         double sum = 0;
                         double denom = 0;
                         for (int j = 0; j < i; j++)
@@ -76,8 +61,8 @@ namespace CF
                             sum += utilMat.get(row, kneighbors[j]) * kscores[j];
                             denom += kscores[j];
                         }
-                        
-
+                        if (!Double.IsNaN(sum/denom))
+                            local.set(row, (int)col, sum / denom);
                     }
                     return local;
                 },
@@ -107,7 +92,7 @@ namespace CF
                 if (!utilMat.hashMap.ContainsKey(col))
                     continue;
 
-                int[] neighbors = this.myLSH.allNeighbors(col);
+                int[] neighbors = this.myLSH.allCandidates(col);
                 double[] simScores = this.utilMat.sim(col, neighbors);
                 Array.Sort<double, int>(simScores, neighbors);
                 Array.Reverse(simScores);
@@ -151,32 +136,32 @@ namespace CF
             if (norm)
                 utilMat.normalize();
             if (usingLSH)
-                this.myLSH = new COSLSH(utilMat, r, b, this);
+                this.myLSH = new LSH(utilMat, r, b, this);
 
         }
-        #endregion
 
-        protected int[] allNeighbors(int col, int row = -1)
+
+        private int[] allCandidates(int col, int row)
         {
             if (this.myLSH == null)
             {
                 List<int> candidates = new List<int>(); ;
                 for (int i = 0; i < utilMat.GetLength(1); i++)
                 {
-                    if (row == -1 || utilMat.contains(row, i)  && i != col)
+                    if (utilMat.get(row, i) != -1 && i != col)
                         candidates.Add(i);
                 }
                 return candidates.ToArray();
             }
             else
             {
-                return this.myLSH.allNeighbors(col, row);
+                return this.myLSH.allCandidates(col, row);
             }
         }
-        public virtual Tuple<int[], double[]> kNearestNeighbors(int principal, int row = -1, int k = 5)
+        public Tuple<int[], double[]> kNearestNeighbors(int principal, int row, int k)
         {
             Tuple<int[], double[]> rtn = new Tuple<int[], double[]>(new int[k], new double[k]);
-            int[] allCandidates = this.allNeighbors(principal, row);
+            int[] allCandidates = this.allCandidates(principal, row);
             int len = allCandidates.Length;
             if (len < k)
             {
@@ -184,7 +169,7 @@ namespace CF
                 for (i = 0; i < allCandidates.Length; i++)
                 {
                     rtn.Item1[i] = allCandidates[i];
-                    rtn.Item2[i] = utilMat.sim(principal, allCandidates[i]); //investigate merits
+                    rtn.Item2[i] = utilMat.cosineSim(principal, allCandidates[i]) * utilMat.jacSim(principal, allCandidates[i]); //investivate merits
                 }
                 for (; i < k; i++)
                 {
@@ -207,7 +192,7 @@ namespace CF
             }
             return rtn;
         }
-        public double predict(int[] kneighbors, double[] ksimMeasure, int row, int col, double confidence=0)
+        public double predict(int[] kneighbors, double[] ksimMeasure, int row, int col)
         {
             if (this.utilMat.get(row, col) != -1)
             {
@@ -220,14 +205,13 @@ namespace CF
             {
                 if (kneighbors[i] == -1)
                     continue;
+                if (utilMat.get(row, kneighbors[i]) == -1)
+                    continue;
                 double a = utilMat.get(row, kneighbors[i]);
                 double b = ksimMeasure[i];
-                if (a == -1 || b<confidence)
-                    continue;
 
-
-                sum += a * b;//important, consider using square
-                normalization_factor += Math.Abs(b); //important, think harder about this later.
+                sum += utilMat.get(row, kneighbors[i]) * ksimMeasure[i];//important, consider using square
+                normalization_factor += Math.Abs(ksimMeasure[i]); //important, think harder about this later.
             }
 
             rtn = sum / normalization_factor;
@@ -290,144 +274,5 @@ namespace CF
             }
         }
     }
-
-    #region JACCF
-    [Serializable()]
-    class ZOCF : CF
-    {
-        private Matrix simMat;
-        public ZOCF(ZOMatrix utilMat, bool usingLSH = false, int r = 10, int b = 20, bool norm = true, double preserve = 0.8)
-            : base(utilMat, false, r, b, norm)
-        {
-            this.utilMat = utilMat;
-            if (norm)
-                utilMat.normalize();
-            if (usingLSH)
-                this.myLSH = new JACLSH(utilMat, r, b, this);
-            this.simMat = this.utilMat;// PCA.dmR(utilMat, preserve);
-        }
-
-
-
-        public double predict(int row, int col, bool noEstimate = false, double threshold = 0.5, int neighbors = 10, bool round = true)
-        {
-            double rtn = base.predict(row, col,false);
-            if (!round)
-                return rtn;
-            if (Double.IsNaN(rtn))
-                return double.NaN;
-            return rtn < threshold ? 0 : 1;
-        }
-        public void buildModel(int k = 5, double confidence =0)
-        {
-            double total = this.utilMat.getCols().Count();
-            double progress = 0;
-
-            predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
-            Parallel.For<Matrix>(0, utilMat.GetLength(1),
-                () =>
-                {
-                    Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
-                    return rtn;
-                },
-                (col, state, local) =>
-                {
-                    local.set(1, 1, col);
-                    if (!utilMat.hashMap.ContainsKey((int)col))
-                        return local;
-                    //local.set(-1, 0, 1);
-                    progress++;
-                    Console.WriteLine("progress: {0}", progress / total); 
-                    int[] neighbors = this.allNeighbors((int)col);
-                    double[] simScores = this.simMat.sim((int)col, neighbors);
-                    Array.Sort<double, int>(simScores, neighbors);
-                    Array.Reverse(simScores);
-                    Array.Reverse(neighbors);
-
-                    for (int row = 0; row < utilMat.GetLength(0); row++)
-                    {
-                        if (utilMat.contains(row, col))
-                            continue;
-                        int[] kneighbors = new int[k];
-                        double[] kscores = new double[k];
-                        int i = 0;
-                        for (int ind = 0; ind < neighbors.Length; ind++)
-                        {
-                            int colAtInd = neighbors[ind];
-                            if (utilMat.contains(row, colAtInd))
-                            {
-                                kneighbors[i] = neighbors[ind];
-                                kscores[i] = simScores[ind];
-                                i++;
-                                if (i == k|| simScores[ind]<confidence)
-                                    break;
-                            }
-                        }
-                        double sum = 0;
-                        double denom = 0;
-                        for (int j = 0; j < i; j++)
-                        {
-                            sum += utilMat.get(row, kneighbors[j]) * kscores[j];
-                            denom += kscores[j];
-                        }
-                        if (!Double.IsNaN(sum / denom))
-                            predictionResults.set(row, (int)col, sum / denom);
-                    }
-                    return local;
-                },
-                (local) =>
-                {
-                    int col = (int)local.get(1, 1);
-                    lock (utilMat)
-                    {
-                        if (local.hashMap.ContainsKey(0))
-                            foreach (int row in local.getRowsOfCol(0))
-                                predictionResults.set(row, col, local.get(row, 0));
-                        //else
-                        //    if (utilMat.hashMap.ContainsKey(col))
-                        //        throw new Exception("bla");
-                    }
-                }
-            );
-
-
-        }
-        public override Tuple<int[], double[]> kNearestNeighbors(int principal, int row = -1, int k = 5)
-        {
-            Tuple<int[], double[]> rtn = new Tuple<int[], double[]>(new int[k], new double[k]);
-            int[] allCandidates = this.allNeighbors(principal, row);
-            int len = allCandidates.Length;
-            if (len < k)
-            {
-                int i;
-                for (i = 0; i < allCandidates.Length; i++)
-                {
-                    rtn.Item1[i] = allCandidates[i];
-                    rtn.Item2[i] = simMat.sim(principal, allCandidates[i]); //investigate merits
-                }
-                for (; i < k; i++)
-                {
-                    rtn.Item1[i] = -1;
-                    rtn.Item2[i] = 0;
-                }
-                Array.Sort(rtn.Item2, rtn.Item1);
-                Array.Reverse(rtn.Item2);
-                Array.Reverse(rtn.Item1);
-            }
-            else
-            {
-                double[] cosSim = simMat.sim(principal, allCandidates);
-                Array.Sort(cosSim, allCandidates); //important, bad implementation right here, will want to optimize later
-                for (int i = 0; i < k; i++)
-                {
-                    rtn.Item1[i] = allCandidates[len - 1 - i];
-                    rtn.Item2[i] = cosSim[len - 1 - i];
-                }
-            }
-            return rtn;
-        }
-    }
-    #endregion 
-
 
 }

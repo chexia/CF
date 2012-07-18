@@ -20,7 +20,7 @@ namespace CF
             //Console.WriteLine(pca.GetNumberOfComponents(0.9f));
 
             //return;
-            Matrix utilMat = LogProcess.makeUtilMat("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", 0, 1);
+            Matrix utilMat = LogProcess.makeUtilMat(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", 0, 1);
             Console.WriteLine(utilMat.GetLength(0));
             Console.WriteLine(utilMat.GetLength(1));
             double[,] sourceMatrix = new double[utilMat.GetLength(1), utilMat.GetLength(0)];
@@ -48,7 +48,7 @@ namespace CF
 
             //Console.WriteLine(components[0, 0]);
         }
-        public static Matrix dmR(Matrix utilMat, double preserve = 0.8)
+        public static JACMatrix dmR(JACMatrix utilMat, double preserve=0.8)
         {
             PrincipalComponentAnalysis pca;
             double[,] sourceMatrix = new double[utilMat.GetLength(1), utilMat.GetLength(0)];
@@ -60,7 +60,7 @@ namespace CF
             int numCom = pca.GetNumberOfComponents((float)preserve);
 
             double[,] reducedUtilMat = pca.Transform(sourceMatrix, numCom);
-            utilMat = new Matrix(reducedUtilMat.GetLength(1), reducedUtilMat.GetLength(0));
+            utilMat = new JACMatrix(reducedUtilMat.GetLength(1), reducedUtilMat.GetLength(0));
             for (int col = 0; col < reducedUtilMat.GetLength(0); col++)
                 for (int row = 0; row < reducedUtilMat.GetLength(1); row++)
                     utilMat.set(row, col, sourceMatrix[col, row]);

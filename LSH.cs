@@ -11,15 +11,16 @@ using Wintellect.PowerCollections;
 
 namespace CF
 {
+
     [Serializable()]
-    abstract class LSH
+    class LSH
     {
-        protected int numSets;
-        protected int r, b;
-        protected Dictionary<int, int>[] sigMat; //gets hash value from column
-        protected MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
-        protected CF filter;
-        protected Random randGen = new Random();
+        private int numSets;
+        private int r, b;
+        private Dictionary<int,int>[] sigMat; //gets hash value from column
+        private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
+        private CF filter;
+        private Random randGen = new Random();
         public LSH(Matrix utilMat, int r, int b, CF filter)
         {
             this.filter = filter;
@@ -41,7 +42,7 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allNeighbors(int col, int principalRow = -1)
+        public int[] allCandidates(int col, int principalRow)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -50,7 +51,7 @@ namespace CF
                 ICollection<int> neighbors = revSigMat[bandInd][hashCode];
                 foreach (int i in neighbors)
                 {
-                    if (principalRow == -1 || this.filter.utilMat.get(principalRow, i) != -1)
+                    if (this.filter.utilMat.get(principalRow,i)!=-1)
                         candidates.Add(i);
                 }
             }
@@ -60,7 +61,7 @@ namespace CF
             return candidates.ToArray<int>();
         }
         // does not take row into consideration
-        public int[] allNeighbors(int col)
+        public int[] allCandidates(int col)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -77,20 +78,11 @@ namespace CF
             //Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
-        protected abstract void compSigMatEntries(Matrix utilMat);
-        protected abstract int[][] compRandVec(int veclen);
-    }
-    [Serializable()]
-    class COSLSH: LSH
-    {
-        public COSLSH(Matrix utilMat, int r, int b, CF filter)
-            : base(utilMat, r, b, filter)
-        { }
 
         /* computes r*b random vectors which act as locality-sensitive functions.
          * @arguments: vecLen is the length of a single random vector
          */
-        protected override int[][] compRandVec(int vecLen)
+        private int[][] compRandVec(int vecLen)
         {
             int[][] rtn = new int[r][];
             for (int i = 0; i < r ; i++)//loop over array of random vectors
@@ -110,7 +102,7 @@ namespace CF
         /* produces signature matrix from original matrix, for compression purposes
          * @arguments: takes in the original matrix
          */
-        protected override void compSigMatEntries(Matrix utilMat)
+        private void compSigMatEntries(Matrix utilMat)
         {
             int[] bandArr = new int[b];
             for (int i=0;i<b;i++)
@@ -162,97 +154,4 @@ namespace CF
 
         }
     }
-    #region JACLSH
-    [Serializable()]
-    class JACLSH : LSH
-    {
-        private int numSets;
-        private int r, b;
-        private Dictionary<int, int>[] sigMat; //gets hash value from column
-        private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
-        private ZOCF filter;
-        private Random randGen = new Random();
-        public JACLSH(ZOMatrix utilMat, int r, int b, ZOCF filter) : base(utilMat, r, b, filter)
-        { }
-
-
-
-        /* computes r*b random vectors which act as locality-sensitive functions.
-         * @arguments: vecLen is the length of a single random vector
-         */
-        protected override int[][] compRandVec(int vecLen)
-        {
-            int[][] rtn = new int[r][];
-            Random rand = new Random();
-            for (int i = 0; i < r; i++)//loop over array of random vectors
-            {
-                rtn[i] = new int[vecLen];
-                double[] tmp = new double[vecLen];
-                for (int j = 0; j < vecLen; j++)
-                {
-                    rtn[i][j] = j;
-                    tmp[j] = rand.NextDouble();
-                }
-                Array.Sort(tmp, rtn[i]);
-            }
-            return rtn;
-        }
-        /* produces signature matrix from original matrix, for compression purposes
-         * @arguments: takes in the original matrix
-         */
-        protected override void compSigMatEntries(Matrix utilMat)
-        {
-            int[] bandArr = new int[b];
-            for (int i = 0; i < b; i++)
-                bandArr[i] = i;
-            Parallel.For<Dictionary<int, Dictionary<int, int>>>(0, b,
-                                                                () => new Dictionary<int, Dictionary<int, int>>(),
-                                                                (bandInd, foo, sigMatLocal) =>
-                                                                {
-                                                                    sigMatLocal[bandInd] = new Dictionary<int, int>();
-                                                                    int[][] currBandRandVec = compRandVec(utilMat.GetLength(0));
-                                                                    for (int col = 0; col < this.numSets; col++)
-                                                                    {
-                                                                        string tmpHash = "";
-                                                                        for (int vecInd = 0; vecInd < r; vecInd++)
-                                                                        {
-                                                                            double result = 0;
-                                                                            for (int row = 0; row < utilMat.GetLength(0); row++)
-                                                                            {
-                                                                                int realRow = currBandRandVec[vecInd][row];
-                                                                                if (utilMat.get(realRow, col) == 1)
-                                                                                {
-                                                                                    result = realRow;
-                                                                                    break;
-                                                                                }
-                                                                            }
-                                                                            tmpHash += result;
-                                                                        }
-                                                                        int hashCode = tmpHash.GetHashCode();
-                                                                        sigMatLocal[bandInd].Add(col, hashCode);
-                                                                    }
-                                                                    return sigMatLocal;
-                                                                },
-                                                                (sigMatLocal) =>
-                                                                {
-                                                                    foreach (int bandInd in sigMatLocal.Keys)
-                                                                    {
-                                                                        foreach (int colInd in sigMatLocal[bandInd].Keys)
-                                                                        {
-                                                                            lock (this.sigMat)
-                                                                            {
-                                                                                this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
-                                                                            }
-                                                                            lock (this.revSigMat)
-                                                                            {
-                                                                                this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                });
-
-
-        }
-    }
-    #endregion
 }

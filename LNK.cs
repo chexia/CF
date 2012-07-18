@@ -20,7 +20,7 @@ namespace CF
             int[] ui = JACtest.cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             //JACtest.split("jac_usi_processed.log");
-            ZOMatrix testMat = JACtest.makeUtilMat(ui[0], ui[1], "jac_test.log", 0, 2);
+            JACMatrix testMat = JACtest.makeUtilMat(ui[0], ui[1], "jac_test.log", 0, 2);
             LNK trainLNK = makeLNK(ui[0], ui[1], "jac_train.log");
             trainLNK.iterate(10);
             int[] final = new int[4] { 0, 0, 0, 0 };
@@ -105,6 +105,9 @@ namespace CF
             // initialize A
             foreach (double[] point in points)
             {
+                int bbb = 0;
+                if (point[0] == 37 && point[1] == 17)
+                    bbb = 1;
                 A[(int)point[0], (int)point[1]] = point[2];
             }
 
