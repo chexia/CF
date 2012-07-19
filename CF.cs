@@ -14,7 +14,69 @@ namespace CF
         public Matrix utilMat;
         public LSH myLSH;
         private Matrix predictionResults;
+        public void buildModel(int k=5)
+        {
+            int progress = 0;
+            int total = utilMat.getCols().Count();
+            predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
+            Parallel.For<Matrix>(0, utilMat.GetLength(1),
+                () => {
+                    Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
+                    return rtn;
+                },
+                (col, state, local) =>
+                {
+                    if (col==13)
+                        col=13;
+                    local.set(1, 1, col);
+                    if (!utilMat.hashMap.ContainsKey((int)col))
+                        return local;
+                    progress++;
+                    Console.WriteLine(progress / (double)total);
+                    //local.set(-1, 0, 1);
+                    int[] neighbors = this.myLSH.allCandidates((int)col);
+                    double[] simScores = this.utilMat.sim((int)col, neighbors);
+                    Array.Sort<double, int>(simScores, neighbors);
+                    Array.Reverse(simScores);
+                    Array.Reverse(neighbors);
 
+                    for (int row = 0; row < utilMat.GetLength(0); row++)
+                    {
+                        Double prediction = this.predict(neighbors, simScores, row, col, 5);
+                        prediction = prediction *utilMat.setDev[col] + utilMat.setAvg[col];
+                        if (row == 28 && col == 49)
+                            row = 28;
+                        if (!Double.IsNaN(prediction))
+                            local.set(row, 0, prediction);
+                    }
+                    return local;
+                },
+                (local) =>
+                {
+                    int col=(int)local.get(1,1);
+                    if (col == 13)
+                        col = 13;
+                    lock (predictionResults)
+                    {
+                        if (local.hashMap.ContainsKey(0))
+                            foreach (int row in local.getRowsOfCol(0))
+                            {
+                                int tmp = 0;
+                                if (row == 28 && col == 49)
+                                    tmp = 28;
+                                predictionResults.set(row, col, local.get(row, 0));
+                            }
+                        //else
+                        //    if (utilMat.hashMap.ContainsKey(col))
+                        //        throw new Exception("bla");
+                    }
+                }
+            );
+                
+
+        }
+
+        /*
         public void buildModel(int k = 5)
         {
             double progress = 0;
@@ -39,36 +101,6 @@ namespace CF
 
                     for (int row = 0; row < utilMat.GetLength(0); row++)
                     {
-                        #region manual
-                        /*
-                        if (utilMat.contains(row, (int)col))
-                            continue;
-                        int[] kneighbors = new int[k];
-                        double[] kscores = new double[k];
-                        int i = 0;
-                        for (int ind = 0; ind < neighbors.Length; ind++)
-                        {
-                            int colAtInd = neighbors[ind];
-                            if (utilMat.contains(row, colAtInd))
-                            {
-                                kneighbors[i] = neighbors[ind];
-                                kscores[i] = simScores[ind];
-                                i++;
-                                if (i == k)
-                                    break;
-                            }
-                        }
-                        double sum = 0;
-                        double denom = 0;
-                        for (int j = 0; j < i; j++)
-                        {
-                            sum += utilMat.get(row, kneighbors[j]) * kscores[j];
-                            denom += kscores[j];
-                        }
-                        double prediction = sum / denom;
-                         * */
-                        #endregion
-
                         Double prediction = this.predict(neighbors, simScores, row, col, 5);
                         if (!Double.IsNaN(prediction))
                             local.set(row, 0, prediction);
@@ -96,6 +128,7 @@ namespace CF
 
 
         }
+        */
         /*
         public void buildModelL(int k = 5)
         {
@@ -166,8 +199,8 @@ namespace CF
                 allNeighbors = candidates.ToArray();
             }
             else
-                allNeighbors = this.myLSH.allNeighbors(col);
-            
+                allNeighbors = this.myLSH.allCandidates(col);
+
             // done extracting allNeighbors, now compute similarity
 
             double[] neighborScores = this.utilMat.sim(col, allNeighbors);
@@ -187,12 +220,12 @@ namespace CF
             {
                 List<int> candidates = new List<int>();
                 for (int i = 0; i < utilMat.GetLength(1); i++)
-                    if (utilMat.contains(row,i) && i != col)
+                    if (utilMat.contains(row, i) && i != col)
                         candidates.Add(i);
                 allNeighbors = candidates.ToArray();
             }
             else
-                allNeighbors = this.myLSH.allNeighbors(col, row);
+                allNeighbors = this.myLSH.allCandidates(col, row);
 
             // done extracting allNeighbors, now compute similarity
 
@@ -210,11 +243,11 @@ namespace CF
             double rtn = 0;
             double sum = 0;
             double normalization_factor = 0;
-            for (int i = 0, j=0; i < neighbors.Length && j<k; i++)
+            for (int i = 0, j = 0; i < neighbors.Length && j < k; i++)
             {
                 int ncol = neighbors[i];
                 if (ncol == -1)
-                    throw new Exception ("should not have -1 as neighbor ind");
+                    throw new Exception("should not have -1 as neighbor ind");
                 if (!utilMat.contains(row, ncol))
                     continue;
                 else
@@ -244,12 +277,25 @@ namespace CF
                 //throw new Exception("training set test set overlap");
                 return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
             }
-            if (this.predictionResults != null && this.predictionResults.contains(row, col))
-                return this.predictionResults.get(row, col);
+            if (this.predictionResults != null)
+            {
+                if (this.predictionResults.contains(row, col))
+                    return this.predictionResults.get(row, col);
+                else
+                    return double.NaN;
+            }
+
             Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
             double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
+
+            return rtn;
+
+            //Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
+            //int[] kneighbors = ns.Item1;
+            //double[] ksimMeasure = ns.Item2;
+            //double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
 
             return rtn;
         }

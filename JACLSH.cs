@@ -18,8 +18,8 @@ namespace CF
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
-            JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
+            ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
             JACCF filter = new JACCF(traintMat, false, 5, 10, false);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<MultiDictionary<double, int>>(0, ui[0],
@@ -86,8 +86,8 @@ namespace CF
             int[] ui = cleanLogsj(inputData);
             Console.WriteLine("numUser:{0}\tnumIntent:{1}", ui[0], ui[1]);
             split("jac_usi_processed.log");
-            JACMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
-            JACMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
+            ZOMatrix testMat = makeUtilMat(ui[1], ui[0], "jac_test.log");
+            ZOMatrix traintMat = makeUtilMat(ui[1], ui[0], "jac_train.log");
             JACCF filter = new JACCF(traintMat, false, 5, 10, false, preserve);
             int[] final = new int[4] { 0, 0, 0, 0 };
             Parallel.For<int[]>(0, ui[0],
@@ -262,7 +262,7 @@ namespace CF
             }
             writer.Close();
         }
-        public static JACMatrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 2, int colPos = 0, int valPos = 1)
+        public static ZOMatrix makeUtilMat(int rowNum, int colNum, string inputFilePath, int rowPos = 2, int colPos = 0, int valPos = 1)
         {
             List<double[]> points = new List<double[]>();
             LogEnum logenum = new LogEnum(inputFilePath);
@@ -278,7 +278,7 @@ namespace CF
                     point[2] = Double.Parse(tokens[valPos]);
                 points.Add(point);
             }
-            JACMatrix utilMat = new JACMatrix(rowNum, colNum, points);
+            ZOMatrix utilMat = new ZOMatrix(rowNum, colNum, points);
             return utilMat;
         }
         #endregion
@@ -288,18 +288,18 @@ namespace CF
     [Serializable()]
     class JACCF
     {
-        public JACMatrix utilMat;
-        public JACMatrix simMat;
+        public ZOMatrix utilMat;
+        public ZOMatrix simMat;
         public JACLSH myLSH;
 
 
-        public JACCF(JACMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve = 0.8)
+        public JACCF(ZOMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true, double preserve = 0.8)
         {
             this.utilMat = utilMat;
             if (norm)
                 utilMat.normalize();
             if (usingLSH)
-                this.myLSH = new JACLSH(utilMat, r, b, this);
+                //this.myLSH = new JACLSH(utilMat, r, b, this);
             this.simMat = PCA.dmR(utilMat, preserve);
 
         }
@@ -319,7 +319,7 @@ namespace CF
             }
             else
             {
-                return this.myLSH.allCandidates(col, row);
+                return this.myLSH.allNeighbors(col, row);
             }
         }
         public Tuple<int[], double[]> kNearestNeighbors(int principal, int row, int k)
@@ -423,9 +423,9 @@ namespace CF
         private int r, b;
         private Dictionary<int, int>[] sigMat; //gets hash value from column
         private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
-        private JACCF filter;
+        private ZOCF filter;
         private Random randGen = new Random();
-        public JACLSH(JACMatrix utilMat, int r, int b, JACCF filter)
+        public JACLSH(ZOMatrix utilMat, int r, int b, ZOCF filter)
         {
             this.filter = filter;
             this.numSets = utilMat.GetLength(1);
@@ -446,7 +446,7 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allCandidates(int col, int principalRow)
+        public int[] allNeighbors(int col, int principalRow)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -465,6 +465,23 @@ namespace CF
             return candidates.ToArray<int>();
         }
 
+        public int[] allNeighbors(int col)
+        {
+            HashSet<int> candidates = new HashSet<int>();
+            for (int bandInd = 0; bandInd < b; bandInd++)
+            {
+                int hashCode = sigMat[bandInd][col];
+                ICollection<int> neighbors = revSigMat[bandInd][hashCode];
+                foreach (int i in neighbors)
+                {
+                    candidates.Add(i);
+                }
+            }
+            if (candidates.Contains(col))
+                candidates.Remove(col);
+            //Console.WriteLine(candidates.Count);
+            return candidates.ToArray<int>();
+        }
 
 
         /* computes r*b random vectors which act as locality-sensitive functions.
@@ -490,7 +507,7 @@ namespace CF
         /* produces signature matrix from original matrix, for compression purposes
          * @arguments: takes in the original matrix
          */
-        private void compSigMatEntries(JACMatrix utilMat)
+        private void compSigMatEntries(ZOMatrix utilMat)
         {
             int[] bandArr = new int[b];
             for (int i = 0; i < b; i++)
@@ -546,12 +563,12 @@ namespace CF
     }
     #endregion
 
-    #region JACMatrix
+    #region ZOMatrix
     [Serializable()]
-    class JACMatrix : Matrix
+    class ZOMatrix : Matrix
     {
 
-        public JACMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0)
+        public ZOMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0)
             : base(numRow, numCol, points)
         {
         }

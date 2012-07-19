@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 namespace CF
 {
     [Serializable()]
+    
     class ZOCF
     {
-        public Matrix utilMat;
-        public LSH myLSH;
+        public ZOMatrix utilMat;
+        public JACLSH myLSH;
         private Matrix predictionResults;
 
         public void buildModel(int k = 5)
@@ -57,69 +58,20 @@ namespace CF
                                 foreach (int row in local.getRowsOfCol(0))
                                     predictionResults.set(row, col, local.get(row, 0));
                             }
-                        //else
-                        //    if (utilMat.hashMap.ContainsKey(col))
-                        //        throw new Exception("bla");
                     }
                 }
             );
 
 
         }
-        /*
-        public void buildModelL(int k = 5)
-        {
-            predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
-            for (int col = 0; col < utilMat.GetLength(1); col++)
-            {
-                if (!utilMat.hashMap.ContainsKey(col))
-                    continue;
 
-                int[] neighbors = this.myLSH.allNeighbors(col);
-                double[] simScores = this.utilMat.sim(col, neighbors);
-                Array.Sort<double, int>(simScores, neighbors);
-                Array.Reverse(simScores);
-                Array.Reverse(neighbors);
-
-                for (int row = 0; row < utilMat.GetLength(0); row++)
-                {
-                    if (utilMat.contains(row, col))
-                        continue;
-                    int[] kneighbors = new int[k];
-                    double[] kscores = new double[k];
-                    int i = 0;
-                    for (int ind = 0; ind < neighbors.Length; ind++)
-                    {
-                        int colAtInd = neighbors[ind];
-                        if (utilMat.contains(row, colAtInd))
-                        {
-                            kneighbors[i] = neighbors[ind];
-                            kscores[i] = simScores[ind];
-                            i++;
-                            if (i == k)
-                                break;
-                        }
-                    }
-                    double sum = 0;
-                    double denom = 0;
-                    for (int j = 0; j < i; j++)
-                    {
-                        sum += utilMat.get(row, kneighbors[j]) * kscores[j];
-                        denom += kscores[j];
-                    }
-                    if (!Double.IsNaN(sum / denom))
-                        predictionResults.set(row, (int)col, sum / denom);
-                }
-            }
-        }
-        */
-        public ZOCF(Matrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = true)
+        public ZOCF(ZOMatrix utilMat, bool usingLSH = true, int r = 10, int b = 20, bool norm = false)
         {
             this.utilMat = utilMat;
             if (norm)
                 utilMat.normalize();
             if (usingLSH)
-                this.myLSH = new LSH(utilMat, r, b, this);
+                this.myLSH = new JACLSH(utilMat, r, b, this);
 
         }
 
@@ -211,11 +163,15 @@ namespace CF
                 return double.NaN;
             if (this.utilMat.contains(row, col))
             {
-                //throw new Exception("training set test set overlap");
-                return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
+                return this.utilMat.get(row, col) ;
             }
-            if (this.predictionResults != null && this.predictionResults.contains(row, col))
-                return this.predictionResults.get(row, col);
+            if (this.predictionResults != null)
+            {
+                if (this.predictionResults.contains(row, col))
+                    return this.predictionResults.get(row, col);
+                else
+                    return 0;
+            }
             Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
@@ -226,5 +182,5 @@ namespace CF
 
 
     }
-
+    
 }

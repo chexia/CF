@@ -42,7 +42,7 @@ namespace CF
          * each column represents a set, e.g. user/page/intent node
          * @arguments: index of column
          */
-        public int[] allNeighbors(int col)
+        public int[] allCandidates(int col)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -60,7 +60,7 @@ namespace CF
             //Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
-        public int[] allNeighbors(int col, int row)
+        public int[] allCandidates(int col, int row)
         {
             HashSet<int> candidates = new HashSet<int>();
             for (int bandInd = 0; bandInd < b; bandInd++)
@@ -69,16 +69,16 @@ namespace CF
                 ICollection<int> neighbors = revSigMat[bandInd][hashCode];
                 foreach (int i in neighbors)
                 {
-                    if (this.filter.utilMat.contains(row,i))
+                    if (this.filter.utilMat.contains(row, i))
                         candidates.Add(i);
                 }
             }
             if (candidates.Contains(col))
-            candidates.Remove(col);
-            //Console.WriteLine(candidates.Count);
+                candidates.Remove(col);
+            Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
-        // does not take row into consideration
+
 
 
         /* computes r*b random vectors which act as locality-sensitive functions.
@@ -123,7 +123,7 @@ namespace CF
                                                                             double result = 0;
                                                                             for (int row = 0; row < utilMat.GetLength(0); row++)
                                                                             {
-                                                                                if (utilMat.contains(row,col))
+                                                                                if (!utilMat.contains(row, col)) // THERE IS A BUG WITH utilmat.contains!!!!!!!!!!!!!!!!!!!!
                                                                                     continue;
                                                                                 result += currBand[vecInd][row] * utilMat.get(row, col);
                                                                             }

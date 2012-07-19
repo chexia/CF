@@ -192,9 +192,12 @@ namespace CF
             */
             //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log");
             //Tester.ABTest_h(10000, 10000, 10000, -1,-1,1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
-
+            //LogProcess.cleanLogs1("jac_test.log", "jac_test.log", "small_test", "small_train");
+            //split("small_test");
+            //Tester.ABTest_h(10000, 10000, 10000, -9, -9, 1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            //return;
             Tester.ABTest_h(10000, 10000, 10000, -8, -8, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
-
+            return;
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
                     for (double confidence = 0; confidence < 0.5; confidence += 0.05)
@@ -375,7 +378,8 @@ namespace CF
             string line = reader.ReadLine();
             while (line != null)
             {
-                double binNum = Math.Ceiling(Double.Parse(line) / 0.001);
+                string[] tokens = line.Split(new char[] { '\t' });
+                double binNum = Math.Ceiling(Double.Parse(tokens[0]) / 0.001);
 
                 if (bins.ContainsKey(binNum))
                     bins[binNum] += 1;

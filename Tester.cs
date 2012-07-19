@@ -83,7 +83,7 @@ namespace CF
                 }
                 lock (writer)
                 {
-                    writer.WriteLine(APE);
+                    writer.WriteLine("{0}\t{1}\t{2}", APE, row, col);
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace CF
 
             CF filter = new CF(utilMat);
             Console.WriteLine("Check 3");
-            filter.buildModel();
+            //filter.buildModel();
 
             reader.Close();
 
@@ -254,7 +254,7 @@ namespace CF
 
                     CF filter = new CF(utilMat);
                     Console.WriteLine("Check 3");
-                    filter.buildModel();
+                    //filter.buildModel();
                     Tester tester = new Tester(filter, testPts);
                     tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
                     Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);

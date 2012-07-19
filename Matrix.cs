@@ -93,19 +93,21 @@ namespace CF
             * @arguments: colInd1, colInd2: the idices of two columns to be compared, refers to mat
             * @return: a number between -1 and 1, the higher the more similar. 0 means uncorrelated
             */
-        private double cosineSim(int colInd1, int colInd2)
+        public double cosineSim(int colInd1, int colInd2)
         {
             double sum = 0;
             double sq1 = 0;
             double sq2 = 0;
             if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
                 return 0;
+            Dictionary<int, double> col1 = hashMap[colInd1];
+            Dictionary<int, double> col2 = hashMap[colInd2];
             foreach (int row in this.hashMap[colInd1].Keys)
             {
                 if (!this.contains(row, colInd1) || !this.contains(row, colInd2))
                     continue;
-                double term1 = this.get(row, colInd1);
-                double term2 = this.get(row, colInd2);
+                double term1 = col1[row];
+                double term2 = col2[row];
                 sq1 += term1 * term1;
                 sq2 += term2 * term2;
                 sum += term1 * term2;
@@ -123,22 +125,24 @@ namespace CF
             * @return: a double that represents the similarity score
             */
 
-        private double jacSim(int colInd1, int colInd2)
+        public double jacSim(int colInd1, int colInd2)
         {
             double overlapSum = 0;
             double sum1 = 0;
             double sum2 = 0;
             if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
                 return 0;
-            foreach (int row in this.hashMap[colInd1].Keys)
+            Dictionary<int, double> col1 = hashMap[colInd1];
+            Dictionary<int, double> col2 = hashMap[colInd2];
+            foreach (int row in col1.Keys)
             {
                 sum1 += Math.Abs(this.get(row, colInd1));
                 if (this.hashMap[colInd2].ContainsKey(row))
-                    overlapSum += (Math.Abs(this.get(row, colInd1)) + Math.Abs(this.get(row, colInd2)));
+                    overlapSum += (Math.Abs(col1[row]) + Math.Abs(col2[row]));
             }
-            foreach (int row in this.hashMap[colInd2].Keys)
+            foreach (int row in col2.Keys)
             {
-                sum2 += Math.Abs(this.get(row, colInd2));
+                sum2 += Math.Abs(col2[row]);
             }
             double rtn = overlapSum / (sum1 + sum2);
             if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
