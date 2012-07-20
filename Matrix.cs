@@ -89,6 +89,11 @@ namespace CF
             }
         }
 
+        public double deNorm(int row, int col, double value)
+        {
+            return value * this.setDev[col] + this.setAvg[col];
+        }
+
         /* Computes cosine similarity between vectors represented by two columns, w.r.t. internal utilMat
             * @arguments: colInd1, colInd2: the idices of two columns to be compared, refers to mat
             * @return: a number between -1 and 1, the higher the more similar. 0 means uncorrelated

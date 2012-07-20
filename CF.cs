@@ -262,7 +262,7 @@ namespace CF
             rtn = sum / normalization_factor;
             if (double.IsNaN(rtn))
                 return Double.NaN;
-            rtn = rtn * utilMat.setDev[col] + utilMat.setAvg[col];
+            rtn = utilMat.deNorm(row, col, rtn);
             return rtn;
 
         }
@@ -273,7 +273,7 @@ namespace CF
             if (this.utilMat.contains(row, col))
             {
                 //throw new Exception("training set test set overlap");
-                return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
+                return utilMat.deNorm(row, col, this.utilMat.get(row, col));
             }
             if (this.predictionResults != null)
             {
