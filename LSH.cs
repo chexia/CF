@@ -57,7 +57,7 @@ namespace CF
             }
             if (candidates.Contains(col))
                 candidates.Remove(col);
-            //Console.WriteLine(candidates.Count);
+            Console.WriteLine(candidates.Count);
             return candidates.ToArray<int>();
         }
         public int[] allCandidates(int col, int row)

@@ -194,10 +194,33 @@ namespace CF
             //Tester.ABTest_h(10000, 10000, 10000, -1,-1,1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\test self split\\", 0, 1);
             //LogProcess.cleanLogs1("jac_test.log", "jac_test.log", "small_test", "small_train");
             //split("small_test");
-            //Tester.ABTest_h(10000, 10000, 10000, -9, -9, 1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            //aggregateStats(8000, 13000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid8\\", "about_*_0.txt.txt", "aggregated_stats_");
             //return;
-            Tester.ABTest_h(10000, 10000, 10000, -8, -8, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            
+            LogEnum lge = new LogEnum("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5_enlarged.log");
+            foreach (string line in lge)
+            {
+                string[] tokens= line.Split(new char[]{'\t'});
+                if (tokens[0] == "30000190" || tokens[1] == "279299956")
+                    Console.WriteLine(line);
+            }
             return;
+            for (int i = 1000; i < 10000; i += 500)
+            {
+                LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\test_" + i + ".log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5_enlarged.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log");
+                //Tester.ABTest_h(i, i, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
+                Tester.ABTest_h(10000, 10000, 10000, -i, -i, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
+            }
+            
+            return;
+            Tester.ABTest_h(10000, 10000, 10000, -13, -13, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 1, 0);
+            return;
+            Tester.ABTest_h(10000, 10000, 10000, -13, -13, 1, "jac_test.log", "jac_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 1, 0);
+            return;
+            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_remote.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_remote.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed11.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed11.log");
+            Tester.ABTest_h(8000, 13000, 500, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed11.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed11.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid8\\", 1, 0);
+            return;
+            
             for (double threshold = 0.3; threshold < 5; threshold += 0.1)
                 for (int neighbors = 3; neighbors < 6; neighbors += 1)
                     for (double confidence = 0; confidence < 0.5; confidence += 0.05)

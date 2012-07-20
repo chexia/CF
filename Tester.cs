@@ -252,7 +252,7 @@ namespace CF
 
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
-                    CF filter = new CF(utilMat);
+                    CF filter = new CF(utilMat,false);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
                     //filter.buildModel();
                     Tester tester = new Tester(filter, testPts);

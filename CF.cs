@@ -28,47 +28,46 @@ namespace CF
                 {
                     if (col==13)
                         col=13;
-                    local.set(1, 1, col);
                     if (!utilMat.hashMap.ContainsKey((int)col))
                         return local;
                     progress++;
                     Console.WriteLine(progress / (double)total);
                     //local.set(-1, 0, 1);
-                    int[] neighbors = this.myLSH.allCandidates((int)col);
-                    double[] simScores = this.utilMat.sim((int)col, neighbors);
-                    Array.Sort<double, int>(simScores, neighbors);
-                    Array.Reverse(simScores);
-                    Array.Reverse(neighbors);
+                    Tuple<int[], double[]> ns = this.getNeighborsScores(col);
+                    int[] neighbors = ns.Item1;
+                    double[] simScores = ns.Item2;
 
                     for (int row = 0; row < utilMat.GetLength(0); row++)
                     {
-                        Double prediction = this.predict(neighbors, simScores, row, col, 5);
-                        prediction = prediction *utilMat.setDev[col] + utilMat.setAvg[col];
-                        if (row == 28 && col == 49)
-                            row = 28;
+                        Double prediction = this.predict(neighbors, simScores, row, (int)col, 5);
+                        //prediction = prediction *utilMat.setDev[col] + utilMat.setAvg[col];
                         if (!Double.IsNaN(prediction))
-                            local.set(row, 0, prediction);
+                        {
+                            lock (predictionResults)
+                            {
+                                //predictionResults.set(row, col, prediction);
+                                local.set(row, col, prediction);
+                            }
+                        }
                     }
                     return local;
                 },
                 (local) =>
                 {
-                    int col=(int)local.get(1,1);
-                    if (col == 13)
-                        col = 13;
-                    lock (predictionResults)
+                    foreach (int col in local.getCols())
                     {
-                        if (local.hashMap.ContainsKey(0))
-                            foreach (int row in local.getRowsOfCol(0))
+                        //int col = (int)local.get(1, 1);
+                        lock (predictionResults)
+                        {
+                            
+                            foreach (int row in local.getRowsOfCol(col))
                             {
-                                int tmp = 0;
-                                if (row == 28 && col == 49)
-                                    tmp = 28;
-                                predictionResults.set(row, col, local.get(row, 0));
+                                predictionResults.set(row, col, local.get(row, col));
                             }
                         //else
                         //    if (utilMat.hashMap.ContainsKey(col))
                         //        throw new Exception("bla");
+                        }
                     }
                 }
             );
@@ -263,7 +262,6 @@ namespace CF
             rtn = sum / normalization_factor;
             if (double.IsNaN(rtn))
                 return Double.NaN;
-
             rtn = rtn * utilMat.setDev[col] + utilMat.setAvg[col];
             return rtn;
 
@@ -282,7 +280,7 @@ namespace CF
                 if (this.predictionResults.contains(row, col))
                     return this.predictionResults.get(row, col);
                 else
-                    return double.NaN;
+                    return double.NaN; 
             }
 
             Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
