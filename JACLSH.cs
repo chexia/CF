@@ -400,7 +400,7 @@ namespace CF
                     return Double.NaN;//throw new Exception("cannot predict without estimate");
                 return this.utilMat.get(row, col) * this.utilMat.setDev[col] + this.utilMat.setAvg[col];
             }
-            if (!this.utilMat.hashMap.ContainsKey(col))
+            if (!this.utilMat.sourceMatrix.ContainsKey(col))
                 return double.NaN;
             Tuple<int[], double[]> ns = this.kNearestNeighbors(col, row, neighbors);
             int[] kneighbors = ns.Item1;
@@ -423,9 +423,9 @@ namespace CF
         private int r, b;
         private Dictionary<int, int>[] sigMat; //gets hash value from column
         private MultiDictionary<int, int>[] revSigMat; //gets list of columns with given hash code
-        private ZOCF filter;
+        private CF filter;
         private Random randGen = new Random();
-        public JACLSH(ZOMatrix utilMat, int r, int b, ZOCF filter)
+        public JACLSH(ZOMatrix utilMat, int r, int b, CF filter)
         {
             this.filter = filter;
             this.numSets = utilMat.GetLength(1);
@@ -563,75 +563,6 @@ namespace CF
     }
     #endregion
 
-    #region ZOMatrix
-    [Serializable()]
-    class ZOMatrix : Matrix
-    {
 
-        public ZOMatrix(int numRow, int numCol, List<double[]> points = null, double nullRtn = 0)
-            : base(numRow, numCol, points)
-        {
-        }
-
-        public double get(int rowInd, int colInd)
-        {
-            return base.get(rowInd, colInd) == 1 ? 1 : 0;
-        }
-        public void set(int rowInd, int colInd, double value)
-        {
-            if (value != 1 && value != 0)
-                throw new Exception("only 1");
-            base.set(rowInd, colInd, value);
-        }
-
-
-        /* Computes additional similarity score based on amount of overlap between two columns, similar in idea to Jaccard Distance
-         * @arguments: column indices of two columns to be compared
-         * @return: a double that represents the similarity score
-         */
-        /*
-        public double jacSim(int colInd1, int colInd2)
-        {
-            double overlapSum = 0;
-            double sum1 = 0;
-            double sum2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
-                return 0;
-            foreach (int row in this.hashMap[colInd1].Keys)
-            {
-                sum1 += 1;
-                if (hashMap[colInd2].ContainsKey(row))
-                    overlapSum += 1;
-            }
-            foreach (int row in this.hashMap[colInd2].Keys)
-            {
-                sum2 += 1;
-            }
-            double rtn = overlapSum / (sum1 + sum2 - overlapSum);
-
-            if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
-                rtn = 0;
-            return rtn;
-        }
-        */
-        /* Overloaded cosineSim for an entire array of columns to compare with a principal column
-         * returns an array of similarity scores
-         */
-        /*
-        public double[] sim(int principal, int[] neighbors)
-        {
-            double[] rtn = new double[neighbors.Length];
-            for (int i = 0; i < neighbors.Length; i++)
-            {
-                rtn[i] = this.jacSim(principal, neighbors[i]);
-                if (rtn[i] == 1)
-                    continue;
-
-            }
-            return rtn;
-        }
-         * */
-    }
-    #endregion
 
 }

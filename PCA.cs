@@ -8,6 +8,75 @@ namespace CF
 {
     class PCA
     {
+        private double[,] feature_row;
+        private double[,] feature_col;
+        private int numFeatures;
+        private Matrix cached_predictions;
+        private Matrix raw;
+        private double lrate = 0.001;
+        public PCA(Matrix raw, int dims = 50)
+        {
+            this.raw = raw;
+            numFeatures = dims;
+            feature_row = new double[numFeatures, raw.GetLength(0)];
+            feature_col = new double[numFeatures, raw.GetLength(1)];
+            for (int i = 0; i < numFeatures; i++)
+                for (int j = 0; j < raw.GetLength(0); j++)
+                    feature_row[i, j] = 0.1;
+            for (int i = 0; i < numFeatures; i++)
+                for (int j = 0; j < raw.GetLength(1); j++)
+                    feature_col[i, j] = 0.1;
+            cached_predictions = new Matrix(raw.GetLength(0), raw.GetLength(1));
+            foreach (int col in raw.getCols())
+                foreach (int row in raw.getRowsOfCol(col))
+                    cached_predictions.set(row, col, 0);
+        }
+        public void compute()
+        {
+            for (int feature = 0; feature < numFeatures; feature++)
+            {
+                int counter = 0;
+                bool converged = false;
+                while (!converged)
+                {
+                    double max_err = 0;
+                    foreach (int col in cached_predictions.getCols())
+                        foreach (int row in cached_predictions.getRowsOfCol(col))
+                        {
+                            double err = lrate * (raw.get(row, col) - predictRating(row, col, feature));
+                            double fr = feature_row[feature, row];
+                            feature_row[feature, row] = fr + err * feature_col[feature, col];
+                            feature_col[feature, col] = feature_col[feature, col] + err * fr;
+                            max_err = Math.Max(err, max_err);
+                        }
+                    counter++;
+                    if (counter>1000000)
+                        converged = true;
+
+                }
+                foreach (int col in cached_predictions.getCols())
+                    foreach (int row in cached_predictions.getRowsOfCol(col))
+                        cached_predictions.set(row, col, predictRating(row, col, feature));
+            }
+        }
+        private double predictRating(int row, int col, int feature)
+        {
+            double sum = 0;
+            sum += feature_row[feature, row] * feature_col[feature, col];
+            return sum + cached_predictions.get(row, col);
+
+        }
+
+        public double[,] rc_eigenvectors()
+        {
+            return feature_col;
+        }
+        public double[,] rr_eigenvectors()
+        {
+            return feature_row;
+        }
+
+
         public static void foo()
         {
             // sourceMatrix[a,b] -> a: index of point, b: index of variable/feature

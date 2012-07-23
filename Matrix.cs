@@ -10,11 +10,29 @@ using System.Threading.Tasks;
 
 namespace CF
 {
+    /// <summary>
+    /// An inherited class of PointMatrix, mainly adds useful methods for the purpose of collaborative filtering
+    /// Once again, column-major convention is used, i.e. rows are features, and each column represents an entity.
+    /// </summary>
     [Serializable()]
     class Matrix : PointMatrix
     {
+        /// <summary>
+        /// The average value for each column. The average value = (sum of all known entries in given column)/(number of known entries in given column)
+        /// note: may want to try weighted average later on.
+        /// </summary>
         public double[] setAvg;
+        /// <summary>
+        /// The deviation for each column, also computed over all known entries in given column.
+        /// </summary>
         public double[] setDev;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="numRow">number of rows of matrix to be constructed</param>
+        /// <param name="numCol">number of columns of matrix to be constructed</param>
+        /// <param name="points">optional list of double[3] points that will populate the matrix, in the form (row, col, value) </param>
         public Matrix(int numRow, int numCol, List<double[]> points = null)
             : base(numRow, numCol)
         {
@@ -22,6 +40,7 @@ namespace CF
             setDev = new double[numCol];
             for (int i = 0; i < numCol; i++)
             {
+                setAvg[i] = 0;
                 setDev[i] = 1;
             }
             if (points != null)
@@ -34,26 +53,31 @@ namespace CF
                 }
             }
         }
-
+        /// <summary>
+        /// Returns an IEnumberable of the columns present in the matrix
+        /// </summary>
+        /// <returns>IEnumberable of columns in the matrix</returns>
         public IEnumerable<int> getCols()
         {
-            return this.hashMap.Keys;
+            return this.sourceMatrix.Keys;
         }
 
+        /// <summary>
+        /// Returns an array of the row indices in the given column, for which entries are known
+        /// </summary>
+        /// <param name="col">index of column</param>
+        /// <returns>Array of row indices in that column</returns>
         public int[] getRowsOfCol(int col)
         {
-            if (!this.hashMap.ContainsKey(col))
+            if (!this.sourceMatrix.ContainsKey(col))
                 return null;
-            return this.hashMap[col].Keys.ToArray<int>();
+            return this.sourceMatrix[col].Keys.ToArray<int>();
         }
-        /* Takes in a matrix of doubles and normalizes each column in place,
-            * such that each column sums to 1. "-1's" denote unknown entries and
-            * are left alone.
-            * @arguments: a matrix of doubles to be normalized in place
-            * @return: a vector of doubles, such that return[k] = average value of
-            * kth column in utilMat BEFORE normalization
-            */
-        public void normalize()
+
+        /// <summary>
+        /// Normalizes the columns, such that the average is 1 and the standard deviation is 0.
+        /// </summary>
+        public virtual void normalize()
         {
             int rowCount = this.GetLength(0);
             int colCount = this.GetLength(1);
@@ -89,25 +113,36 @@ namespace CF
             }
         }
 
-        public double deNorm(int row, int col, double value)
+        /// <summary>
+        /// Undo the effects of normalization, to obtain the actual value, uses setAvg and setDev
+        /// </summary>
+        /// <param name="row">row index where value is obtained</param>
+        /// <param name="col">col index where value is obtained</param>
+        /// <param name="value"></param>
+        /// <returns>de-normalized value</returns>
+        public virtual double deNorm(int row, int col, double value)
         {
             return value * this.setDev[col] + this.setAvg[col];
         }
 
-        /* Computes cosine similarity between vectors represented by two columns, w.r.t. internal utilMat
-            * @arguments: colInd1, colInd2: the idices of two columns to be compared, refers to mat
-            * @return: a number between -1 and 1, the higher the more similar. 0 means uncorrelated
-            */
-        public double cosineSim(int colInd1, int colInd2)
+
+        /// <summary>
+        /// Computes cosine similarity between vectors represented by two columns, w.r.t. internal utilMat
+        /// </summary>
+        /// <param name="colInd1">index of one column to be compared</param>
+        /// <param name="colInd2">index of another column to be compared</param>
+        /// <returns>a number between -1 and 1: the cosine similarity computed over rows for which both colInd1 and colInd2 have known entries</returns>
+        public virtual double cosineSim(int colInd1, int colInd2)
         {
             double sum = 0;
             double sq1 = 0;
             double sq2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
+            if (colInd1 == -1 || colInd2 == -1 || !this.sourceMatrix.ContainsKey(colInd1) || !this.sourceMatrix.ContainsKey(colInd2))
                 return 0;
-            Dictionary<int, double> col1 = hashMap[colInd1];
-            Dictionary<int, double> col2 = hashMap[colInd2];
-            foreach (int row in this.hashMap[colInd1].Keys)
+            Dictionary<int, double> col1 = sourceMatrix[colInd1];
+            Dictionary<int, double> col2 = sourceMatrix[colInd2];
+            List<double[]> forDebug = new List<double[]>();
+            foreach (int row in this.sourceMatrix[colInd1].Keys)
             {
                 if (!this.contains(row, colInd1) || !this.contains(row, colInd2))
                     continue;
@@ -116,12 +151,12 @@ namespace CF
                 sq1 += term1 * term1;
                 sq2 += term2 * term2;
                 sum += term1 * term2;
+                forDebug.Add(new double[] { term1, term2 });
 
             }
             double rtn = (sum / (Math.Sqrt(sq1) * Math.Sqrt(sq2)));
             if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
                 return 0;
-
             return rtn;
         }
 
@@ -129,20 +164,26 @@ namespace CF
             * @arguments: column indices of two columns to be compared
             * @return: a double that represents the similarity score
             */
-
-        public double jacSim(int colInd1, int colInd2)
+        /// <summary>
+        /// Something like the jaccard similarity, applied to continuous values instead of boolean 1/0 set membership
+        /// </summary>
+        /// <param name="colInd1">Index of one column to be compared</param>
+        /// <param name="colInd2">Index of another column to be compared</param>
+        /// <returns>a number between 1 and 0 that represents how much of the two columns overlap, higher means more overlap</returns>
+        
+        public virtual double jacSim(int colInd1, int colInd2)
         {
             double overlapSum = 0;
             double sum1 = 0;
             double sum2 = 0;
-            if (colInd1 == -1 || colInd2 == -1 || !this.hashMap.ContainsKey(colInd1) || !this.hashMap.ContainsKey(colInd2))
+            if (colInd1 == -1 || colInd2 == -1 || !this.sourceMatrix.ContainsKey(colInd1) || !this.sourceMatrix.ContainsKey(colInd2))
                 return 0;
-            Dictionary<int, double> col1 = hashMap[colInd1];
-            Dictionary<int, double> col2 = hashMap[colInd2];
+            Dictionary<int, double> col1 = sourceMatrix[colInd1];
+            Dictionary<int, double> col2 = sourceMatrix[colInd2];
             foreach (int row in col1.Keys)
             {
                 sum1 += Math.Abs(this.get(row, colInd1));
-                if (this.hashMap[colInd2].ContainsKey(row))
+                if (this.sourceMatrix[colInd2].ContainsKey(row))
                     overlapSum += (Math.Abs(col1[row]) + Math.Abs(col2[row]));
             }
             foreach (int row in col2.Keys)
@@ -153,14 +194,19 @@ namespace CF
             if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
                 rtn = 0;
             if (rtn < 0)
-                sum1 = 1;
+                throw new Exception("should not be the case");
             return rtn;
         }
 
-        /* Overloaded cosineSim for an entire array of columns to compare with a principal column
-            * returns an array of similarity scores
-            */
-        public double[] sim(int principal, int[] neighbors)
+
+        /// <summary>
+        /// Overloaded similarity function for an entire array of columns to compare with a principal column
+        /// returns an array of similarity scores
+        /// </summary>
+        /// <param name="principal">index of "principal column", against which all other columns are compared</param>
+        /// <param name="neighbors">array of indices for neighbor columns</param>
+        /// <returns>Array of similarity scores, product of cosineSim and jacSim</returns>
+        public virtual double[] sim(int principal, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
             for (int i = 0; i < neighbors.Length; i++)
@@ -168,12 +214,26 @@ namespace CF
             return rtn;
         }
 
-        public double sim(int principal, int neighbors)
+        /// <summary>
+        /// computes composite similarity score between two columns
+        /// </summary>
+        /// <param name="principal">index of one column</param>
+        /// <param name="neighbor">index of another column</param>
+        /// <returns>similarity score, product of cosineSim and jacSim</returns>
+        public virtual double sim(int principal, int neighbor)
         {
-            double rtn = this.cosineSim(principal, neighbors) * this.jacSim(principal, neighbors);
+            double rtn = this.cosineSim(principal, neighbor) * this.jacSim(principal, neighbor);
             return rtn;
         }
 
+
+
+        /// <summary>
+        /// no longer used
+        /// </summary>
+        /// <param name="k"></param>
+        /// <param name="dim"></param>
+        /// <returns></returns>
         public HashSet<int> randomSubset(int k, int dim)
         {
             Random rand = new Random();

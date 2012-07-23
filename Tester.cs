@@ -27,7 +27,7 @@ namespace CF
         {
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
-            Parallel.ForEach<int>(testPoints.hashMap.Keys, act);
+            Parallel.ForEach<int>(testPoints.sourceMatrix.Keys, act);
             //Parallel.ForEach<int, List<double>>(testPoints.hashMap.Keys, () => new List<double>(), processCol2, aggregateResult);
             //foreach (int key in testPoints.mat.hashMap.Keys)
             //    act(key);
@@ -51,15 +51,26 @@ namespace CF
                 double trueVal = testPoints.get(row, col);
                 double predictedVal = filter.predict(row, col);
 
+                //
+                //predictedVal = (predictedVal - filter.utilMat.setAvg[col]);
+                //trueVal = trueVal - filter.utilMat.setAvg[col];
+                //
+
                 if (double.IsNaN(predictedVal))
                     APE = 1;
                 else
-                    APE = Math.Abs(predictedVal - trueVal) / (trueVal);
+                    APE = Math.Abs(predictedVal - trueVal) / Math.Abs(trueVal);
+
+                //
+                //APE = APE==1?1:predictedVal * trueVal > 0 ? 0 : 2;
+                //
+
                 if (trueVal == 0)
                 {
                     //continue;
                     APE = 1;
                 }
+
                 lock (writer)
                 {
                     writer.WriteLine("{0}\t{1}\t{2}", APE, row, col);
@@ -109,7 +120,7 @@ namespace CF
 
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
-                    CF filter = new CF(utilMat,false);//, true, 10, 20, false);
+                    CF filter = new CF(utilMat, true);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
                     //filter.buildModel();
                     Tester tester = new Tester(filter, testPts);
@@ -156,7 +167,7 @@ namespace CF
 
         public static void PUTest()
         {
-            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\test_10000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_pu.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log");
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\test_less_10000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_5_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log");
             for (int threshold =1000; threshold<10000; threshold+=500){
                 string inputPath = "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log";
                 StreamWriter writer = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp");
@@ -165,16 +176,16 @@ namespace CF
                 {
                     string[] tokens = line.Split(new char[] { '\t' });
                     double train_views = double.Parse(tokens[4]);
-                    if (train_views < threshold+500)
+                    if (train_views > threshold && train_views < threshold + 500)
                     {
                         writer.WriteLine(line);
                     }
                 }
                 writer.Close();
                 int min = threshold + 500;
-                
-                Tester.ABTest_h(min, min, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
-                Tester.ABTest_h(10000, 10000, 10000, -min, -min, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
+
+                Tester.ABTest_h(threshold, threshold, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
+                Tester.ABTest_h(min, min, 10000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
             }
         }
         public static double testFixedBlock(int numUsr, int numAd, Matrix ad_muid_click, Matrix ad_muid_view, Matrix intent_muid, CF filter, StreamWriter writer, string outputFile = "C:\\Users\\t-chexia\\Desktop\\blocktest\\blockTestOutput.txt")
@@ -194,7 +205,7 @@ namespace CF
                 {
                     foreach (int ad in adSample)
                     {
-                        if (!ad_muid_click.contains(ad, user) || !intent_muid.hashMap.ContainsKey(user))
+                        if (!ad_muid_click.contains(ad, user) || !intent_muid.sourceMatrix.ContainsKey(user))
                             continue;
                         numClick += ad_muid_click.get(ad, user);
                         numView += ad_muid_view.get(ad, user);
@@ -246,7 +257,7 @@ namespace CF
             int principalIntent = 0;
             double principalScore = double.MinValue;
 
-            foreach (int intent in intent_muid.hashMap[user].Keys)
+            foreach (int intent in intent_muid.sourceMatrix[user].Keys)
             {
                 double score = intent_muid.get(intent, user);
 
@@ -258,8 +269,8 @@ namespace CF
             }
             double view = 0;
             double click = 0;
-            foreach (int muid in intent_muid.hashMap.Keys)
-                if (intent_muid.hashMap[muid].ContainsKey(principalIntent))
+            foreach (int muid in intent_muid.sourceMatrix.Keys)
+                if (intent_muid.sourceMatrix[muid].ContainsKey(principalIntent))
                     if (ad_muid_click.contains(ad, muid))
                     {
                         view += ad_muid_view.get(ad, muid);
@@ -275,7 +286,7 @@ namespace CF
             double ctrSum = 0;
             double denom = 0;
 
-            foreach (int intent in intent_muid.hashMap[user].Keys)
+            foreach (int intent in intent_muid.sourceMatrix[user].Keys)
             {
                 double score = intent_muid.get(intent, user);
                 //double ctr = filter.predict(intent, ad);

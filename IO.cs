@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Wintellect.PowerCollections;
 using Accord.Statistics.Analysis;
 using System.Diagnostics;
+using Accord.Statistics.Analysis;
+
 namespace CF
 {
     class IO
@@ -17,8 +19,89 @@ namespace CF
         static void Main(string[] args)
         {
 
-            //aggregateStats(1500, 10000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_0.txt.txt", "aggregated_stats_");
+            aggregateStats(1000, 14500, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", "about_*_-1.txt.txt");
+            return;
+            
+            Tester.ABTest_h(1000, 5000, 1000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", 0, 1);
+            Tester.ABTest_h(15000, 15000, 1000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", 0, 1);
+            Tester.ABTest_h(1500, 15000, 1000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed16.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", 0, 1);
+            return;
+            Matrix foo = LogProcess.makeUtilMat(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", 0, 1);
+            foo.normalize();
+            foreach (int i in foo.getCols())
+            {
+
+                StreamWriter writer = new StreamWriter("gaussianCTR");
+                if (foo.getRowsOfCol(i).Count() > 100)
+                {
+                    double sum = 0;
+                    Console.WriteLine("exists");
+                    foreach (int row in foo.getRowsOfCol(i))
+                    {
+                        sum+=foo.get(row,i);
+                        writer.WriteLine(foo.get(row, i));
+                    }
+                    Console.WriteLine(sum);
+                }
+                writer.Close();
+                accumulateResult("gaussianCTR", "gaussianCTR.log");
+                break;
+                    
+            }
+            return;
+            Tester.ABTest_h(10000, 10000, 1000, -16, -16, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            
+            return;
+            preMat pMa = new preMat(5, 5);
+            pMa.set(0, 0, 0.2);
+            pMa.set(3, 0, 1);
+            pMa.set(0, 1, 0);
+            pMa.set(1, 1, 0.1);
+            pMa.set(2, 1, 0.3);
+            pMa.set(3, 1, 0.6);
+            pMa.set(1, 2, 0.1);
+            pMa.set(0, 3, 0);
+            pMa.set(1, 3, 0.01);
+            pMa.set(2, 3, 0.03);
+            pMa.set(3, 3, 0.06);
+            pMa.set(4, 3, 0.02);
+            pMa.set(4, 2, 0.1);
+            CF filter = new CF(pMa, false, true);
+            Console.WriteLine(filter.toString());
+            return;
+            Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 5 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 7 }, new double[3] { 1, 1, 9 }, new double[3] { 1, 2, 2 }, new double[3] { 2, 0, 1 }, new double[3] { 2, 1, 2 }, new double[3] { 2, 2, 8 }}));
+            
+            double[,] sourceMatrix = new double[tmat.GetLength(1), tmat.GetLength(0)];
+            foreach (int col in tmat.getCols())
+                foreach (int row in tmat.getRowsOfCol(col))
+                    sourceMatrix[col, row] = tmat.get(row, col);
+            PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(sourceMatrix);
+            pca.Compute();
+            foreach (PrincipalComponent i in pca.Components)
+                for (int j=0; j<i.Eigenvector.Length;j++)
+                    Console.WriteLine(i.Eigenvector[j]);
             //return;
+            PCA pcaa = new PCA(tmat, 3);
+            pcaa.compute();
+            double[,] rcv = pcaa.rc_eigenvectors();
+            for (int col = 0; col < rcv.GetLength(1); col++)
+                for (int row = 0; row < rcv.GetLength(0); row++ )
+                    Console.WriteLine(rcv[row, col]);
+            return;
+
+
+            Tester.ABTest_h(10000, 10000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            return;
+            aggregateStats(1000, 10000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_0.txt.txt", "aggregated_stats_dir");
+            aggregateStats(1500, 10000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_-1.txt.txt", "aggregated_stats_pre");
+            return;
+            Tester.PUTest();
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_20.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed15.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed15.log");
+            Tester.ABTest_h(1000, 5000, 1000, -16, -16, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed15.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed15.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
+            return;
+
+            aggregateStats(1500, 10000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_0.txt.txt", "aggregated_stats_");
+            return;
 
             Tester.PUTest();
             
@@ -64,7 +147,43 @@ namespace CF
             return;
 
         }
-        
+
+        public static void filterData(string inputPrefix, string genericFilename, int s, int e, int step)
+        {
+            string[] halves = genericFilename.Split(new char[] { '*' });
+            string left = halves[0];
+            string right = halves[1];
+            HashSet<string> keep = new HashSet<string>();
+            int i = s;
+            {
+                string fileName = left + i + right;
+                string filePath = inputPrefix + fileName;
+                LogEnum le = new LogEnum(filePath);
+                foreach (string line in le)
+                {
+                    string[] tokens = line.Split();
+                    if (tokens[0] != "1")
+                        keep.Add(tokens[1]+"\t"+tokens[2]);
+                }
+            }
+
+            for (i = s; i >= e; i -= step)
+            {
+                string fileName = left + i + right;
+                string filePath = inputPrefix + fileName;
+                LogEnum le = new LogEnum(filePath);
+                StreamWriter writer = new StreamWriter("temp\\" + fileName);
+                foreach (string line in le)
+                {
+                    string[] tokens = line.Split();
+                    if (keep.Contains(tokens[1]+"\t"+tokens[2]))
+                        writer.WriteLine(line);
+                }
+                writer.Close();
+                IO.accumulateResult("temp\\" + fileName, "temp\\" + fileName + ".txt");
+            }
+        }
+
         public static void parseTest(string inputData)
         {
             LogEnum logenum = new LogEnum(inputData);
