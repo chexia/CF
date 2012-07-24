@@ -25,7 +25,7 @@ namespace CF
                     feature_row[i, j] = 0.1;
             for (int i = 0; i < numFeatures; i++)
                 for (int j = 0; j < raw.GetLength(1); j++)
-                    feature_col[i, j] = 0.1;
+                    feature_col[i, j] = 0;
             cached_predictions = new Matrix(raw.GetLength(0), raw.GetLength(1));
             foreach (int col in raw.getCols())
                 foreach (int row in raw.getRowsOfCol(col))

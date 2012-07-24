@@ -80,8 +80,11 @@ namespace CF
 
 
 
-        public static void ABTest_h(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1)
+        public static void ABTest_h(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string manifest = null, bool normalization = true)
         {
+            StreamWriter manifestWriter = new StreamWriter(outputPrefix + "manifest.txt",true);
+            manifestWriter.WriteLine(manifest);
+            manifestWriter.Close();
             StreamReader reader = File.OpenText(testPath);
             List<double[]> points = new List<double[]>();
 
@@ -120,7 +123,7 @@ namespace CF
 
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
-                    CF filter = new CF(utilMat, true);//, true, 10, 20, false);
+                    CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
                     //filter.buildModel();
                     Tester tester = new Tester(filter, testPts);

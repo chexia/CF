@@ -232,7 +232,9 @@ namespace CF
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
             double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
-
+            if (Double.IsNaN(rtn))
+                rtn = this.utilMat.setAvg[col]; //added
+            //return utilMat.setAvg[col];
             return rtn;
 
         }

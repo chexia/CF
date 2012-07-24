@@ -19,6 +19,33 @@ namespace CF
         static void Main(string[] args)
         {
 
+            Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 1 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 4 }, new double[3] { 1, 1, 5 }, new double[3] { 1, 2, 6 }, new double[3] { 2, 0, 7 }, new double[3] { 2, 1, 8 }, new double[3] { 2, 2, 9 } }));
+            PCA pcaa = new PCA(tmat, 3);
+            pcaa.compute();
+            double[,] rcv = pcaa.rr_eigenvectors();
+            for (int row = 0; row < rcv.GetLength(1); row++)
+                for (int col = 0; col < rcv.GetLength(0); col++)
+                    Console.WriteLine(rcv[row, col]);
+            return;
+
+            double[,] sourceMatrix = new double[tmat.GetLength(1), tmat.GetLength(0)];
+            foreach (int col in tmat.getCols())
+                foreach (int row in tmat.getRowsOfCol(col))
+                    sourceMatrix[col, row] = tmat.get(row, col);
+            PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(sourceMatrix);
+            pca.Compute();
+            foreach (PrincipalComponent i in pca.Components)
+                for (int j = 0; j < i.Eigenvector.Length; j++)
+                    Console.WriteLine(i.Eigenvector[j]);
+            return;
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
+            Tester.ABTest_h(10002, 10002, 1000, 0, 10, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid10\\", 0, 1, -1, "10002 for no intent removal");
+            return;
+            
+            Tester.ABTest_h(10000, 10000, 1000, -2, -2, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 1, 0, -1, "this directory is used for investigating the effects of normalization");
+            Tester.ABTest_h(10000, 10000, 1000, -3, -3, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 1, 0, -1, "this directory is used for investigating the effects of normalization", false);
+            return;
             aggregateStats(1000, 14500, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", "about_*_-1.txt.txt");
             return;
             
@@ -38,16 +65,17 @@ namespace CF
                     Console.WriteLine("exists");
                     foreach (int row in foo.getRowsOfCol(i))
                     {
-                        sum+=foo.get(row,i);
-                        writer.WriteLine(foo.get(row, i));
+                        sum += foo.get(row, i);
+                        writer.WriteLine(foo.get(row, i) * foo.setDev[i] / foo.setAvg[i]);
                     }
                     Console.WriteLine(sum);
                 }
                 writer.Close();
-                accumulateResult("gaussianCTR", "gaussianCTR.log");
+                accumulateResult_nc("gaussianCTR", "gaussianCTR.log");
                 break;
-                    
+
             }
+            return;
             return;
             Tester.ABTest_h(10000, 10000, 1000, -16, -16, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
             
@@ -69,25 +97,8 @@ namespace CF
             CF filter = new CF(pMa, false, true);
             Console.WriteLine(filter.toString());
             return;
-            Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 5 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 7 }, new double[3] { 1, 1, 9 }, new double[3] { 1, 2, 2 }, new double[3] { 2, 0, 1 }, new double[3] { 2, 1, 2 }, new double[3] { 2, 2, 8 }}));
-            
-            double[,] sourceMatrix = new double[tmat.GetLength(1), tmat.GetLength(0)];
-            foreach (int col in tmat.getCols())
-                foreach (int row in tmat.getRowsOfCol(col))
-                    sourceMatrix[col, row] = tmat.get(row, col);
-            PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(sourceMatrix);
-            pca.Compute();
-            foreach (PrincipalComponent i in pca.Components)
-                for (int j=0; j<i.Eigenvector.Length;j++)
-                    Console.WriteLine(i.Eigenvector[j]);
+
             //return;
-            PCA pcaa = new PCA(tmat, 3);
-            pcaa.compute();
-            double[,] rcv = pcaa.rc_eigenvectors();
-            for (int col = 0; col < rcv.GetLength(1); col++)
-                for (int row = 0; row < rcv.GetLength(0); row++ )
-                    Console.WriteLine(rcv[row, col]);
-            return;
 
 
             Tester.ABTest_h(10000, 10000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
@@ -321,6 +332,41 @@ namespace CF
             }
             writer.Close();
         }
+
+        public static void accumulateResult_nc(string inputPath, string outputPath)
+        {
+            int count = 0;
+            StreamReader reader = File.OpenText(inputPath);
+            SortedDictionary<double, int> bins = new SortedDictionary<double, int>();
+            string line = reader.ReadLine();
+            while (line != null)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double binNum = Math.Ceiling(Double.Parse(tokens[0]) / 0.1);
+
+                if (bins.ContainsKey(binNum))
+                    bins[binNum] += 1;
+                else
+                    bins.Add(binNum, 1);
+                line = reader.ReadLine();
+                count += 1;
+            }
+            reader.Close();
+            int total = 0;
+            //Console.WriteLine("threshold:{0}\tcount:{1}", i, count);
+            StreamWriter writer = File.CreateText(outputPath);
+            double prev = 0;
+            double curr = 0;
+            foreach (double key in bins.Keys)
+            {
+                curr = key;
+                total += bins[key];
+                writer.WriteLine("{0}\t{1}", key * 0.1, ((double)bins[key]) / (double)count);
+                prev = key;
+            }
+            writer.Close();
+        }
+
         public static void accumulateResult(int s, int e, int step, string inputPrefix, string outputPrefix)
         {
             for (int i = s; i <= e; i += step)

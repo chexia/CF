@@ -194,12 +194,14 @@ namespace CF
                                                                         {
                                                                             lock (this.sigMat)
                                                                             {
-                                                                                this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
+                                                                                lock (this.revSigMat)
+                                                                                {
+                                                                                    this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
+                                                                                    this.sigMat[bandInd].Add(colInd, sigMatLocal[bandInd][colInd]);
+                                                                                }
+
                                                                             }
-                                                                            lock (this.revSigMat)
-                                                                            {
-                                                                                this.revSigMat[bandInd].Add(sigMatLocal[bandInd][colInd], colInd);
-                                                                            }
+
                                                                         }
                                                                     }
                                                                 });
