@@ -18,7 +18,6 @@ namespace CF
     {
         static void Main(string[] args)
         {
-
             Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 1 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 4 }, new double[3] { 1, 1, 5 }, new double[3] { 1, 2, 6 }, new double[3] { 2, 0, 7 }, new double[3] { 2, 1, 8 }, new double[3] { 2, 2, 9 } }));
             PCA pcaa = new PCA(tmat, 3);
             pcaa.compute();
@@ -27,20 +26,30 @@ namespace CF
                 for (int col = 0; col < rcv.GetLength(0); col++)
                     Console.WriteLine(rcv[row, col]);
             return;
-
-            double[,] sourceMatrix = new double[tmat.GetLength(1), tmat.GetLength(0)];
-            foreach (int col in tmat.getCols())
-                foreach (int row in tmat.getRowsOfCol(col))
-                    sourceMatrix[col, row] = tmat.get(row, col);
-            PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(sourceMatrix);
-            pca.Compute();
-            foreach (PrincipalComponent i in pca.Components)
-                for (int j = 0; j < i.Eigenvector.Length; j++)
-                    Console.WriteLine(i.Eigenvector[j]);
+            //Tester.ABTest_h(10000, 10000, 1000, -5, -5, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 0, 1, -1, "this directory is used for investigating the effects of normalization");
+            Tester.ABTest_h(10000, 10000, 1000, -6, -6, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 1, 0, -1, "this directory is used for investigating the effects of normalization");
+            return;
+            Tester.ABTest_PCA(10000, 15000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid13\\", 0, 1, -1, "pca");
             return;
 
+
+            Tester.PUTest();
+            return;
+            aggregateStats(1004, 15004, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", "about_*_0.txt.txt");
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
+            Tester.ABTest_h(1001, 15001, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", 0, 1, -1, "10001 for 10000v_orm");
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
+            Tester.ABTest_h(1002, 15002, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", 0, 1, -1, "10002 for 10000v_orm_2");
+
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
-            Tester.ABTest_h(10002, 10002, 1000, 0, 10, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid10\\", 0, 1, -1, "10002 for no intent removal");
+            Tester.ABTest_h(1003, 15003, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", 0, 1, -1, "10003 for 10000v_orm_3");
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5_enlarged.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
+            Tester.ABTest_h(1004, 15004, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", 0, 1, -1, "10004 for trainProcessed");
+
+
             return;
             
             Tester.ABTest_h(10000, 10000, 1000, -2, -2, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 1, 0, -1, "this directory is used for investigating the effects of normalization");
@@ -101,6 +110,17 @@ namespace CF
             //return;
 
 
+
+            double[,] sourceMatrix = new double[tmat.GetLength(1), tmat.GetLength(0)];
+            foreach (int col in tmat.getCols())
+                foreach (int row in tmat.getRowsOfCol(col))
+                    sourceMatrix[col, row] = tmat.get(row, col);
+            PrincipalComponentAnalysis pca = new PrincipalComponentAnalysis(sourceMatrix);
+            pca.Compute();
+            foreach (PrincipalComponent i in pca.Components)
+                for (int j = 0; j < i.Eigenvector.Length; j++)
+                    Console.WriteLine(i.Eigenvector[j]);
+            return;
             Tester.ABTest_h(10000, 10000, 1000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
             return;
             aggregateStats(1000, 10000, 500, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_0.txt.txt", "aggregated_stats_dir");

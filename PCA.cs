@@ -14,6 +14,8 @@ namespace CF
         private Matrix cached_predictions;
         private Matrix raw;
         private double lrate = 0.001;
+        private double[] eigenValues;
+        private double[] rowMean;
         public PCA(Matrix raw, int dims = 50)
         {
             this.raw = raw;
@@ -25,7 +27,7 @@ namespace CF
                     feature_row[i, j] = 0.1;
             for (int i = 0; i < numFeatures; i++)
                 for (int j = 0; j < raw.GetLength(1); j++)
-                    feature_col[i, j] = 0;
+                    feature_col[i, j] = 0.1;
             cached_predictions = new Matrix(raw.GetLength(0), raw.GetLength(1));
             foreach (int col in raw.getCols())
                 foreach (int row in raw.getRowsOfCol(col))
@@ -33,12 +35,15 @@ namespace CF
         }
         public void compute()
         {
+            //preprocess();
             for (int feature = 0; feature < numFeatures; feature++)
             {
+                //Console.WriteLine(feature);
                 int counter = 0;
                 bool converged = false;
                 while (!converged)
                 {
+                    //Console.WriteLine(counter);
                     double max_err = 0;
                     foreach (int col in cached_predictions.getCols())
                         foreach (int row in cached_predictions.getRowsOfCol(col))
@@ -58,13 +63,48 @@ namespace CF
                     foreach (int row in cached_predictions.getRowsOfCol(col))
                         cached_predictions.set(row, col, predictRating(row, col, feature));
             }
+            normalize();
+            //postprocess();
+        }
+        private void preprocess()
+        {
+            rowMean = new double[raw.GetLength(0)];
+            for (int row = 0; row < raw.GetLength(0); row++)
+            {
+                double sum=0;
+                double count=0;
+                for (int col = 0; col < raw.GetLength(1); col++)
+                    if (raw.contains(row, col))
+                    {
+                        sum += raw.get(row, col);
+                        count += 1;
+                    }
+                double mean = sum / count;
+                for (int col = 0; col < raw.GetLength(1); col++)
+                {
+                    if (raw.contains(row, col))
+                        raw.set(row, col, raw.get(row, col) - mean);
+                }
+                rowMean[row] = mean;
+            }
+        }
+        private void postprocess()
+        {
+            rowMean = new double[raw.GetLength(0)];
+            for (int row = 0; row < raw.GetLength(0); row++)
+            {
+                for (int col = 0; col < raw.GetLength(1); col++)
+                {
+                    if (raw.contains(row, col))
+                        raw.set(row, col, raw.get(row, col) + rowMean[row]);
+                }
+            }
         }
         private double predictRating(int row, int col, int feature)
         {
             double sum = 0;
             sum += feature_row[feature, row] * feature_col[feature, col];
             return sum + cached_predictions.get(row, col);
-
         }
 
         public double[,] rc_eigenvectors()
@@ -76,6 +116,26 @@ namespace CF
             return feature_row;
         }
 
+        private void normalize()
+        {
+            this.eigenValues = new double[numFeatures];
+            for (int i = 0; i < eigenValues.Length; i++)
+            {
+                double ev = normFeature(feature_row, i) * normFeature(feature_col, i);
+            }
+        }
+        private double normFeature(double[,] mat, int featureNumber)
+        {
+            double sqsum = 0;
+            for (int i = 0; i < mat.GetLength(1); i++)
+                sqsum += Math.Pow(mat[featureNumber, i],2);
+            double magnitude = Math.Sqrt(sqsum);
+            if (magnitude == 0)
+                return 1;
+            for (int i = 0; i < mat.GetLength(1); i++)
+                mat[featureNumber, i] /= magnitude;
+            return magnitude;
+        }
 
         public static void foo()
         {
@@ -156,6 +216,26 @@ namespace CF
             }
             return rtn;
 
+        }
+
+        public Matrix transform(int compDim = 0)
+        {
+            double[,] transMat;
+            Matrix rtn = null;
+            if (compDim == 0)
+            {
+                rtn = new Matrix(numFeatures, raw.GetLength(1), null);
+                transMat = this.feature_row;
+                foreach (int col in raw.getCols())
+                    for (int feature = 0; feature < numFeatures; feature++)
+                    {
+                        double sum = 0;
+                        foreach (int row in raw.getRowsOfCol(col))
+                            sum += (raw.get(row, col) * transMat[feature, row]);
+                        rtn.set(feature, col, sum);
+                    }
+            }
+            return rtn;
         }
     }
 }
