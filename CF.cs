@@ -15,24 +15,97 @@ namespace CF
         public LSH myLSH;
         private Matrix predictionResults;
 
+        #region constructors
+        /// <summary>
+        /// Constructor for collaborative filter. Predictions are made using column-column similarity, i.e. to predict the value at utilMat(row, col), find col'_1 ... col'_k
+        /// which are similar to col, and use utilMat(row,col'_1)...utilMat(row,col'_k) for prediction utilMat(row,col).
+        /// </summary>
+        /// <param name="utilMat">The utility matrix, i.e. the matrix containing all the known data points. </param>
+        /// <param name="usingLSH">A flag that determines if Locality Sensitive Hashing will be used</param>
+        /// <param name="norm">A flag that determines if the data will be normalized prior to making predictions.</param>
+        public CF(Matrix utilMat, bool usingLSH = true, bool norm = true)
+        {
+            this.utilMat = utilMat;
+            if (norm)
+                utilMat.normalize();
+            if (usingLSH)
+                this.myLSH = new LSH(utilMat, 10, 20, this);
+        }
+        #endregion 
+
+
+        ////////////////////////////
+
+
+        #region public methods
+        /// <summary>
+        /// Given row and col, predict the value at utilMat(row,col).
+        /// </summary>
+        /// <param name="row">The row index of the utilMat entry you want to predict.</param>
+        /// <param name="col">The column index of the utilMat entry you want to predict.</param>
+        /// <returns>The predicted value at utilMat(row, col). If unable to make prediction, return Double.NaN. </returns>
+        public double predict(int row, int col)
+        {
+            if (!this.utilMat.sourceMatrix.ContainsKey(col))
+                return double.NaN;
+            if (this.utilMat.contains(row, col))
+            {
+                //throw new Exception("training set test set overlap");
+                return utilMat.deNorm(row, col, this.utilMat.get(row, col));
+            }
+            if (this.predictionResults != null)
+            {
+                if (this.predictionResults.contains(row, col))
+                    return this.predictionResults.get(row, col);
+                else
+                    return double.NaN; 
+            }
+
+            Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
+            int[] kneighbors = ns.Item1;
+            double[] ksimMeasure = ns.Item2;
+            double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
+            if (Double.IsNaN(rtn))
+                rtn = this.utilMat.setAvg[col]; //added
+            //return utilMat.setAvg[col];
+            return rtn;
+
+        }
+
+        public string toString()
+        {
+            string rtn = "";
+            for (int row = 0; row < utilMat.GetLength(0); row++)
+            {
+                for (int col = 0; col < utilMat.GetLength(1); col++)
+                {
+                    rtn += string.Format("{0:N2}", this.predict(row, col)) + "\t";
+                }
+                rtn += "\n";
+            }
+            return rtn;
+
+        }
+
         /// <summary>
         /// Constructs the model offline. This allows future predictions to be done in constant time (only a hashtable lookup is necessary).
         /// </summary>
         /// <param name="k">k defines number of nearest neighbors to be used during model construction (for detailed use see predict)</param>
-        public void buildModel(int k=5)
+        public void buildModel(int k = 5)
         {
             int progress = 0;
             int total = utilMat.getCols().Count();
             predictionResults = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
             Parallel.For<Matrix>(0, utilMat.GetLength(1),
-                () => {
+                () =>
+                {
                     Matrix rtn = new Matrix(utilMat.GetLength(0), 1);
                     return rtn;
                 },
                 (col, state, local) =>
                 {
-                    if (col==13)
-                        col=13;
+                    if (col == 13)
+                        col = 13;
                     if (!utilMat.sourceMatrix.ContainsKey((int)col))
                         return local;
                     progress++;
@@ -64,38 +137,34 @@ namespace CF
                         //int col = (int)local.get(1, 1);
                         lock (predictionResults)
                         {
-                            
+
                             foreach (int row in local.getRowsOfCol(col))
                             {
                                 predictionResults.set(row, col, local.get(row, col));
                             }
-                        //else
-                        //    if (utilMat.hashMap.ContainsKey(col))
-                        //        throw new Exception("bla");
+                            //else
+                            //    if (utilMat.hashMap.ContainsKey(col))
+                            //        throw new Exception("bla");
                         }
                     }
                 }
             );
-                
+
 
         }
 
-        /// <summary>
-        /// Constructor for collaborative filter. Predictions are made using column-column similarity, i.e. to predict the value at utilMat(row, col), find col'_1 ... col'_k
-        /// which are similar to col, and use utilMat(row,col'_1)...utilMat(row,col'_k) for prediction utilMat(row,col).
-        /// </summary>
-        /// <param name="utilMat">The utility matrix, i.e. the matrix containing all the known data points. </param>
-        /// <param name="usingLSH">A flag that determines if Locality Sensitive Hashing will be used</param>
-        /// <param name="norm">A flag that determines if the data will be normalized prior to making predictions.</param>
-        public CF(Matrix utilMat, bool usingLSH = true, bool norm = true)
-        {
-            this.utilMat = utilMat;
-            if (norm)
-                utilMat.normalize();
-            if (usingLSH)
-                this.myLSH = new LSH(utilMat, 10, 20, this);
-        }
+        
+        
+        
+        #endregion
 
+
+        /////////////////////////
+
+
+
+
+        #region private methods
         /// <summary>
         /// Obtains an array of indices of (nearest ) neighbors, and an array of corresponding similarity scores.
         /// If Locality Sensitive Hash is implemented, then only neighbors above a similarity threshold are returned.
@@ -205,54 +274,8 @@ namespace CF
             return rtn;
 
         }
-        /// <summary>
-        /// Given row and col, predict the value at utilMat(row,col).
-        /// </summary>
-        /// <param name="row">The row index of the utilMat entry you want to predict.</param>
-        /// <param name="col">The column index of the utilMat entry you want to predict.</param>
-        /// <returns>The predicted value at utilMat(row, col). If unable to make prediction, return Double.NaN. </returns>
-        public double predict(int row, int col)
-        {
-            if (!this.utilMat.sourceMatrix.ContainsKey(col))
-                return double.NaN;
-            if (this.utilMat.contains(row, col))
-            {
-                //throw new Exception("training set test set overlap");
-                return utilMat.deNorm(row, col, this.utilMat.get(row, col));
-            }
-            if (this.predictionResults != null)
-            {
-                if (this.predictionResults.contains(row, col))
-                    return this.predictionResults.get(row, col);
-                else
-                    return double.NaN; 
-            }
 
-            Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
-            int[] kneighbors = ns.Item1;
-            double[] ksimMeasure = ns.Item2;
-            double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
-            if (Double.IsNaN(rtn))
-                rtn = this.utilMat.setAvg[col]; //added
-            //return utilMat.setAvg[col];
-            return rtn;
+        #endregion // a method in here is actually public, but I have never called it outside CF
 
-        }
-
-        public string toString()
-        {
-            string rtn = "";
-            for (int row = 0; row < utilMat.GetLength(0); row++)
-            {
-                for (int col = 0; col < utilMat.GetLength(1); col++)
-                {
-                    rtn += string.Format("{0:N2}", this.predict(row, col)) + "\t";
-                }
-                rtn += "\n";
-            }
-            return rtn;
-
-        }
     }
-
 }

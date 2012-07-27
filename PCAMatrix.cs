@@ -24,7 +24,7 @@ namespace CF
         /// <param name="principal">index of "principal column", against which all other columns are compared</param>
         /// <param name="neighbors">array of indices for neighbor columns</param>
         /// <returns>Array of similarity scores, product of cosineSim and jacSim</returns>
-        public virtual double[] sim(int principal, int[] neighbors)
+        public override double[] sim(int principal, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
             for (int i = 0; i < neighbors.Length; i++)
@@ -38,7 +38,7 @@ namespace CF
         /// <param name="principal">index of one column</param>
         /// <param name="neighbor">index of another column</param>
         /// <returns>similarity score, product of cosineSim and jacSim</returns>
-        public virtual double sim(int principal, int neighbor)
+        public override double sim(int principal, int neighbor)
         {
             double rtn = this.simMat.cosineSim(principal, neighbor) * this.simMat.jacSim(principal, neighbor);
             return rtn;

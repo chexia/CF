@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Accord.Statistics.Analysis;
+using System.Threading.Tasks;
 
 namespace CF
 {
+    [Serializable()]
     class PCA
     {
         private double[,] feature_row;
@@ -13,7 +15,7 @@ namespace CF
         private int numFeatures;
         private Matrix cached_predictions;
         private Matrix raw;
-        private double lrate = 0.001;
+        private double baselrate = 0.001;
         private double[] eigenValues;
         private double[] rowMean;
         public PCA(Matrix raw, int dims = 50)
@@ -30,12 +32,25 @@ namespace CF
                     feature_col[i, j] = 0.1;
             cached_predictions = new Matrix(raw.GetLength(0), raw.GetLength(1));
             foreach (int col in raw.getCols())
+            {
+                double sum = 0;
+                double counter = 0;
+                foreach (int row in raw.getRowsOfCol(col))
+                {
+                    sum += raw.get(row, col);
+                    if (double.IsNaN(sum))
+                        Console.Write(1);
+                    counter += 1;
+                }
                 foreach (int row in raw.getRowsOfCol(col))
                     cached_predictions.set(row, col, 0);
+            }
         }
         public void compute()
         {
-            //preprocess();
+            preprocess();
+            int iterations = 100000;
+
             for (int feature = 0; feature < numFeatures; feature++)
             {
                 //Console.WriteLine(feature);
@@ -43,6 +58,7 @@ namespace CF
                 bool converged = false;
                 while (!converged)
                 {
+                    double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
                     //Console.WriteLine(counter);
                     double max_err = 0;
                     foreach (int col in cached_predictions.getCols())
@@ -55,7 +71,7 @@ namespace CF
                             max_err = Math.Max(err, max_err);
                         }
                     counter++;
-                    if (counter>1000000)
+                    if (counter > iterations)
                         converged = true;
 
                 }
@@ -90,7 +106,7 @@ namespace CF
         }
         private void postprocess()
         {
-            rowMean = new double[raw.GetLength(0)];
+            //rowMean = new double[raw.GetLength(0)];
             for (int row = 0; row < raw.GetLength(0); row++)
             {
                 for (int col = 0; col < raw.GetLength(1); col++)
@@ -122,6 +138,7 @@ namespace CF
             for (int i = 0; i < eigenValues.Length; i++)
             {
                 double ev = normFeature(feature_row, i) * normFeature(feature_col, i);
+                eigenValues[i] = ev;
             }
         }
         private double normFeature(double[,] mat, int featureNumber)
@@ -137,64 +154,8 @@ namespace CF
             return magnitude;
         }
 
-        public static void foo()
-        {
-            // sourceMatrix[a,b] -> a: index of point, b: index of variable/feature
 
 
-
-            PrincipalComponentAnalysis pca;
-            //pca = (PrincipalComponentAnalysis)IO.load("train_pca_2");
-            //Console.WriteLine(pca.ComponentMatrix.GetLength(0));
-            //Console.WriteLine(pca.GetNumberOfComponents(0.9f));
-
-            //return;
-            Matrix utilMat = LogProcess.makeUtilMat(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", 0, 1);
-            Console.WriteLine(utilMat.GetLength(0));
-            Console.WriteLine(utilMat.GetLength(1));
-            double[,] sourceMatrix = new double[utilMat.GetLength(1), utilMat.GetLength(0)];
-            foreach (int col in utilMat.getCols())
-                foreach (int row in utilMat.getRowsOfCol(col))
-                    sourceMatrix[col, row] = utilMat.get(row, col);
-            double[] rowAvg = PCA.rowAvg(utilMat);
-            for (int i=0; i<sourceMatrix.GetLength(0); i++)
-                for (int j = 0; j < sourceMatrix.GetLength(1); j++)
-                {
-                    if (!utilMat.contains(j, i))
-                        sourceMatrix[i, j] = rowAvg[j];
-                }
-            pca = new PrincipalComponentAnalysis(sourceMatrix);
-            pca.Compute();
-            //double[,] components = pca.Transform(sourceMatrix, 1);
-            Console.WriteLine(pca.GetNumberOfComponents(0.95f));
-            //IO.save(pca, "train_pca_2");
-            while (true)
-            {
-                string foo = Console.ReadLine();
-                float bar = float.Parse(foo);
-                Console.WriteLine(pca.GetNumberOfComponents(bar));
-            }
-
-            //Console.WriteLine(components[0, 0]);
-        }
-        public static ZOMatrix dmR(ZOMatrix utilMat, double preserve=0.8)
-        {
-            PrincipalComponentAnalysis pca;
-            double[,] sourceMatrix = new double[utilMat.GetLength(1), utilMat.GetLength(0)];
-            foreach (int col in utilMat.getCols())
-                foreach (int row in utilMat.getRowsOfCol(col))
-                    sourceMatrix[col, row] = utilMat.get(row, col);
-            pca = new PrincipalComponentAnalysis(sourceMatrix);
-            pca.Compute();
-            int numCom = pca.GetNumberOfComponents((float)preserve);
-
-            double[,] reducedUtilMat = pca.Transform(sourceMatrix, numCom);
-            utilMat = new ZOMatrix(reducedUtilMat.GetLength(1), reducedUtilMat.GetLength(0));
-            for (int col = 0; col < reducedUtilMat.GetLength(0); col++)
-                for (int row = 0; row < reducedUtilMat.GetLength(1); row++)
-                    utilMat.set(row, col, sourceMatrix[col, row]);
-            return utilMat;
-        }
 
         public static double[] rowAvg (Matrix utilMat)
         {
@@ -218,6 +179,25 @@ namespace CF
 
         }
 
+        public Matrix transform(int numDims, int compDim = 0)
+        {
+            double[,] transMat;
+            Matrix rtn = null;
+            if (compDim == 0)
+            {
+                rtn = new Matrix(numFeatures, raw.GetLength(1), null);
+                transMat = this.feature_row;
+                foreach (int col in raw.getCols())
+                    for (int feature = 0; feature < numDims; feature++)
+                    {
+                        double sum = 0;
+                        foreach (int row in raw.getRowsOfCol(col))
+                            sum += (raw.get(row, col) * transMat[feature, row]);
+                        rtn.set(feature, col, sum);
+                    }
+            }
+            return rtn;
+        }
         public Matrix transform(int compDim = 0)
         {
             double[,] transMat;
@@ -236,6 +216,70 @@ namespace CF
                     }
             }
             return rtn;
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        public static void foo()
+        {
+            // sourceMatrix[a,b] -> a: index of point, b: index of variable/feature
+
+
+
+            PrincipalComponentAnalysis pca;
+            //pca = (PrincipalComponentAnalysis)IO.load("train_pca_2");
+            //Console.WriteLine(pca.ComponentMatrix.GetLength(0));
+            //Console.WriteLine(pca.GetNumberOfComponents(0.9f));
+
+            //return;
+            Matrix utilMat = LogProcess.makeUtilMat(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", 0, 1);
+            Console.WriteLine(utilMat.GetLength(0));
+            Console.WriteLine(utilMat.GetLength(1));
+            double[,] sourceMatrix = new double[utilMat.GetLength(1), utilMat.GetLength(0)];
+            foreach (int col in utilMat.getCols())
+                foreach (int row in utilMat.getRowsOfCol(col))
+                    sourceMatrix[col, row] = utilMat.get(row, col);
+            double[] rowAvg = PCA.rowAvg(utilMat);
+            for (int i = 0; i < sourceMatrix.GetLength(0); i++)
+                for (int j = 0; j < sourceMatrix.GetLength(1); j++)
+                {
+                    if (!utilMat.contains(j, i))
+                        sourceMatrix[i, j] = rowAvg[j];
+                }
+            pca = new PrincipalComponentAnalysis(sourceMatrix);
+            pca.Compute();
+            //double[,] components = pca.Transform(sourceMatrix, 1);
+            Console.WriteLine(pca.GetNumberOfComponents(0.95f));
+            //IO.save(pca, "train_pca_2");
+            while (true)
+            {
+                string foo = Console.ReadLine();
+                float bar = float.Parse(foo);
+                Console.WriteLine(pca.GetNumberOfComponents(bar));
+            }
+
+            //Console.WriteLine(components[0, 0]);
         }
     }
 }

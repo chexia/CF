@@ -298,9 +298,9 @@ namespace CF
             this.utilMat = utilMat;
             if (norm)
                 utilMat.normalize();
-            if (usingLSH)
+            //if (usingLSH)
                 //this.myLSH = new JACLSH(utilMat, r, b, this);
-            this.simMat = PCA.dmR(utilMat, preserve);
+            //this.simMat = PCA.dmR(utilMat, preserve);
 
         }
 

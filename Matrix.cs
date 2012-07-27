@@ -52,6 +52,8 @@ namespace CF
                     this.set(rowInd, colInd, point[2]);
                 }
             }
+            
+           // Dictionary<int, double> c = sourceMatrix[18];
         }
         /// <summary>
         /// Returns an IEnumberable of the columns present in the matrix
@@ -107,7 +109,10 @@ namespace CF
                         continue;
                     else
                     {
-                        this.set(row, col, (this.get(row, col) - avg) / std);
+                        double nv = (this.get(row, col) - avg) / std;
+                        if (double.IsNaN(nv))
+                            nv=0;
+                        this.set(row, col, nv);
                     }
                 }
             }

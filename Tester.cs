@@ -16,6 +16,7 @@ namespace CF
         private CF filter;
         private Matrix testPoints;
         private StreamWriter writer;
+        private StreamWriter writer2;
         public Tester(CF filter, Matrix testPoints)
         {
             this.filter = filter;
@@ -25,6 +26,7 @@ namespace CF
 
         public void abtest(string outputFilePath)
         {
+            this.writer2 = new StreamWriter(outputFilePath + ".avg");
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
             Parallel.ForEach<int>(testPoints.sourceMatrix.Keys, act);
@@ -32,7 +34,9 @@ namespace CF
             //foreach (int key in testPoints.mat.hashMap.Keys)
             //    act(key);
             writer.Close();
+            writer2.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
+            IO.accumulateResult(outputFilePath + ".avg", outputFilePath + ".avg" + ".txt");
         }
         private void aggregateResult(List<double> local)
         {
@@ -74,9 +78,76 @@ namespace CF
                 {
                     writer.WriteLine("{0}\t{1}\t{2}", APE, row, col);
                 }
+
+
+                lock (writer2)
+                {
+                    APE = Math.Abs(filter.utilMat.setAvg[col] - trueVal) / Math.Abs(trueVal);
+                    if (trueVal == 0)
+                    {
+                        //continue;
+                        APE = 1;
+                    }
+                    writer2.WriteLine("{0}\t{1}\t{2}", APE, row, col);
+                }
             }
         }
 
+        public static void ABTest_n(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string manifest = null, bool normalization = true, int normMode=0)
+        {
+            StreamWriter manifestWriter = new StreamWriter(outputPrefix + "manifest.txt", true);
+            manifestWriter.WriteLine(manifest);
+            manifestWriter.Close();
+            StreamReader reader = File.OpenText(testPath);
+            List<double[]> points = new List<double[]>();
+
+            reader.Close();
+            Console.WriteLine("Check 1");
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Console.WriteLine("check 2");
+
+            for (int vreq = s; vreq <= e; vreq += step)
+            {
+                for (int creq = s2; creq <= e2; creq += step2)
+                {
+                    int numvalidentries = 0;
+                    reader = File.OpenText(string.Format(trainPath));
+                    points = new List<double[]>();
+                    LogEnum logenum = new LogEnum(trainPath);
+                    int maxRow = 0;
+                    int maxCol = 0;
+                    foreach (string line in logenum)
+                    {
+                        string[] tokens = line.Split(new char[] { '\t' });
+                        double clicks = 0;
+                        double views = 0;
+                        if (valPos == -1)
+                        {
+                            clicks = Double.Parse(tokens[3]);
+                            views = Double.Parse(tokens[2]);
+                        }
+                        if (views < vreq || clicks < creq)
+                            continue;
+                        maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
+                        maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
+                        points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                        numvalidentries += 1;
+                    }
+
+                    Matrix utilMat = normMode == 0 ? new Matrix(maxRow + 1, maxCol + 1, points) : new preMat(maxRow + 1, maxCol + 1, points);
+
+                    CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
+                    Console.WriteLine("Check 3");
+                    //filter.buildModel();
+                    Tester tester = new Tester(filter, testPts);
+                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
+                    reader.Close();
+                }
+            }
+
+            Console.WriteLine("debug: completed AB");
+        }
 
 
         public static void ABTest_h(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string manifest = null, bool normalization = true)
@@ -227,7 +298,7 @@ namespace CF
         public static void PUTest()
         {
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\test_less_10000.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_5_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log");
-            for (int threshold =1000; threshold<10000; threshold+=500){
+            for (int threshold =1000; threshold<10000; threshold+=50000000){
                 string inputPath = "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed12.log";
                 StreamWriter writer = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp");
                 LogEnum le = new LogEnum(inputPath);
@@ -243,7 +314,7 @@ namespace CF
                 writer.Close();
                 int min = threshold + 500;
 
-                Tester.ABTest_h(threshold, threshold, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
+                //Tester.ABTest_h(threshold, threshold, 10000, 0, 0, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
                 Tester.ABTest_h(min, min, 10000, -1, -1, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed12.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", 0, 1);
             }
         }
