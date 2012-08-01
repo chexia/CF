@@ -5,10 +5,14 @@ using System.Text;
 
 namespace CF
 {
-    class preMat : Matrix
+    /// <summary>
+    /// M1: Mean-1, a matrix definition that overrides the original normalize-to-0-by-subtraction, and instead uses normalize-to-1-by division
+    /// Also calculates a row average. This may be moved to the parent Matrix class.
+    /// </summary>
+    [Serializable()]
+    class M1Matrix : Matrix
     {
-        private double[] rowAvg;
-        public preMat(int row, int col, List<double[]> points = null)
+        public M1Matrix(int row, int col, List<double[]> points = null)
             : base(row, col, points)
         {
             for (int i = 0; i < col; i++)
@@ -16,9 +20,32 @@ namespace CF
                 setAvg[i] = 1;
                 setDev[i] = 1;
             }
+            rowAvg = new double[this.GetLength(0)];
         }
         public override void normalize()
         {
+            // now normalizing rows
+            for (int row = 0; row < this.GetLength(0); row++)
+            {
+                double sum = 0;
+                double seenCount = 0;
+                for (int col = 0; col < this.GetLength(1); col++)
+                {
+                    if (!this.contains(row, col))
+                        continue;
+                    else
+                    {
+                        sum += this.get(row, col);
+                        seenCount++;
+                    }
+                }
+                double avg = (double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount;
+                rowAvg[row] = avg;
+            }
+            //done with rows
+
+
+
             int rowCount = this.GetLength(0);
             int colCount = this.GetLength(1);
             foreach (int col in this.getCols())
@@ -57,24 +84,7 @@ namespace CF
 
 
 
-            // now normalizing rows
-            for (int row = 0; row < this.GetLength(0); row++)
-            {
-                double sum = 0;
-                double seenCount = 0;
-                for (int col = 0; col < this.GetLength(1); col++)
-                {
-                    if (!this.contains(row, col))
-                        continue;
-                    else
-                    {
-                        sum += this.get(row, col);
-                        seenCount++;
-                    }
-                }
-                double avg = (double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount;
-                rowAvg[row] = avg;
-            }
+
         }
 
         public override double deNorm(int row, int col, double value)

@@ -5,16 +5,26 @@ using System.Text;
 
 namespace CF
 {
-    class PCAMatrix: Matrix
+    [Serializable()]
+    class PCAMatrix: M1Matrix
     {
+
         private Matrix simMat;
-        public PCAMatrix(int numRow, int numCol, List<double[]> points)
+        public PCAMatrix(int numRow, int numCol, List<double[]> points, PCA inputPCA = null)
             : base(numRow, numCol, points)
         {
-            normalize();
-            PCA pca = new PCA(this);
-            pca.compute();
-            this.simMat = pca.transform();
+            //normalize();
+
+            if (inputPCA == null)
+            {
+                PCA pca = new PCA(this, 30);
+                pca.compute();
+                this.simMat = pca.transform();
+            }
+            else
+            {
+                this.simMat = inputPCA.transform(29, 0);
+            }
         }
 
         /// <summary>

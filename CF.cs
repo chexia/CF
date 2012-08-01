@@ -65,8 +65,13 @@ namespace CF
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
             double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
+
+            //added
+            
+
             if (Double.IsNaN(rtn))
                 rtn = this.utilMat.setAvg[col]; //added
+            
             //return utilMat.setAvg[col];
             return rtn;
 
@@ -163,8 +168,8 @@ namespace CF
 
 
 
-
-        #region private methods
+        // a method in here is actually public, but I have never called it outside CF
+        #region private methods 
         /// <summary>
         /// Obtains an array of indices of (nearest ) neighbors, and an array of corresponding similarity scores.
         /// If Locality Sensitive Hash is implemented, then only neighbors above a similarity threshold are returned.
@@ -255,14 +260,13 @@ namespace CF
                     throw new Exception("invalid neighbor index");
                 if (!utilMat.contains(row, ncol))
                     continue;
+
                 else
                 {
                     double value = utilMat.get(row, ncol);
                     double simScore = simScores[i];
-                    if (simScore > 0.6)
-                        simScore += 0;
-                    sum += value * simScore;//important, consider using square
-                    normalization_factor += Math.Abs(simScore); //important, think harder about this later.
+                    sum += value * simScore;
+                    normalization_factor += Math.Abs(simScore);
                     j++;
                 }
             }
@@ -275,7 +279,7 @@ namespace CF
 
         }
 
-        #endregion // a method in here is actually public, but I have never called it outside CF
+        #endregion 
 
     }
 }

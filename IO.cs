@@ -10,18 +10,175 @@ using System.Threading.Tasks;
 using Wintellect.PowerCollections;
 using Accord.Statistics.Analysis;
 using System.Diagnostics;
-using Accord.Statistics.Analysis;
+
 
 namespace CF
 {
     class IO
     {
+
+        //for recomputation purposes
+        public static void accumulateResult_rc(string inputPath, string outputPath)
+        {
+            int count = 0;
+            StreamReader reader = File.OpenText(inputPath);
+            SortedDictionary<double, int> bins = new SortedDictionary<double, int>();
+            string line = reader.ReadLine();
+            while (line != null)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double APE = Math.Abs(0.8*(Double.Parse(tokens[3]) - Double.Parse(tokens[4])) / Double.Parse(tokens[4]));
+                APE = Double.IsNaN(APE) ? 1 : APE;
+                APE = (Double.Parse(tokens[3]) == 0 && Double.Parse(tokens[4]) == 0) ? 0 : APE;
+                double binNum = Math.Ceiling(APE / 0.001);
+
+                if (bins.ContainsKey(binNum))
+                    bins[binNum] += 1;
+                else
+                    bins.Add(binNum, 1);
+                line = reader.ReadLine();
+                count += 1;
+            }
+            reader.Close();
+            int total = 0;
+            //Console.WriteLine("threshold:{0}\tcount:{1}", i, count);
+            StreamWriter writer = File.CreateText(outputPath);
+            double prev = 0;
+            double curr = 0;
+            foreach (double key in bins.Keys)
+            {
+                curr = key;
+                total += bins[key];
+                writer.WriteLine("{0}\t{1}", key * 0.001, ((double)total) / (double)count);
+                prev = key;
+            }
+            writer.Close();
+        }
         static void Main(string[] args)
         {
-            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed20.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed20.log");
-            Tester.ABTest_n(10002, 10002, 10000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed20.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed20.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", 1, 0, -1, "01 for mean1, 02 for node-node sim mean1", true, 1);
+            aggregateStats(1003, 15000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid12\\", "about_*_0.txt.txt");
             return;
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log");
+            Tester.ABTest_nl(2000, 10000, 2000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final11\\", 0, 1, -1, "adad 2000 to 10000 by 1000 ovrm1 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+
+            return;
+            Tester.ABTest_nl(10000, 10000, 5000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final2\\", 0, 1, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+            return;
+            StreamWriter writer2 = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\tmp");
+            LogEnum le = new LogEnum("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final2\\about_10000_0.txt.avg");
+            foreach (string line in le)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double predicted = double.Parse(tokens[3]);
+                double real = double.Parse(tokens[4]);
+                if (real == predicted && predicted == 0)
+                    writer2.WriteLine(0);
+                else
+                    writer2.WriteLine(tokens[0]);
+            }
+            writer2.Close();
+            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\tmpparsed");
+
+
+            return;
+            LogEnum lea = new LogEnum("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_21.log");
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed23.log");
+            Tester.ABTest_h(10000, 10000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", 0, 1, -1, "known direct accuracy", false);
+            return;
+            aggregateStats(2000, 15000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final9\\", "about_*_0.txt.txt");
+            return;
+
+            Tester.ABTest_hn1(2000, 15000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final9\\", 0, 1, -1, "adad 1000 to 15000 by 1000 ovrm2 norm to 1 lsh, tests for threshold", true);
+
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final2\\", 0, 1, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final3\\", 0, 1, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 0 nolsh, tests for norm effect and dim", true, 0);
+
+            //nodenode
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final4\\", 1, 0, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final5\\", 1, 0, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 0 nolsh, tests for norm effect and dim", true, 0);
+
+
+            Tester.ABTest_PCA(2000, 10000, 1000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final6\\", 0, 1, -1, "adad pca 5000 to 35000 by 5000 ovrm2 norm to 0 no lsh, tests for pca");
+            return;
+
+
+            //Tester.ABTest_hn1(11000, 11000, 2000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final1\\", 0, 1, -1, "adad 5000 to 35000 by 2000 ovrm2 norm to 1 lsh, tests for threshold", true);
+            
+            accumulateResult_rc("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final1\\about_11000_-1.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final1\\tmp3");
+            return;
+
+            aggregateStats(2000, 15000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final8\\", "about_*_0.txt.txt");
+            return;
+            Tester.train_PCA(10000, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", 0, 1, -1, true);
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log");
+            Tester.ABTest_hn1(2000, 15000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final8\\", 0, 1, -1, "adad 1000 to 15000 by 1000 ovrm2 norm to 1 lsh, tests for threshold", true);
+            
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log");
+            
+            //adad
+            Tester.ABTest_hn1(5000, 35000, 2000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final1\\", 0, 1, -1, "adad 5000 to 35000 by 2000 ovrm2 norm to 1 lsh, tests for threshold", true);
+            
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final2\\", 0, 1, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final3\\", 0, 1, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 0 nolsh, tests for norm effect and dim", true, 0);
+
+            //nodenode
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final4\\", 1, 0, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 1 nolsh, tests for norm effect and dim", true, 1);
+
+            Tester.ABTest_nl(5000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final5\\", 1, 0, -1, "adad 5000 to 35000 by 5000 ovrm2 norm to 0 nolsh, tests for norm effect and dim", true, 0);
+
+
+            //pca
+            Tester.ABTest_PCA(5000, 35000, 5000, 10, 10, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final6\\", 0, 1, -1, "adad pca 5000 to 35000 by 5000 ovrm2 norm to 0 no lsh, tests for pca");
+
+
+            //adad
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_using_5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_using_5_enlarged.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log");
+            Tester.ABTest_hn1(10000, 35000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final7\\", 0, 1, -1, "adad 10000 to 35000 by 5000 test/train_enlarged norm to 1 lsh, tests for n1 performance on different data", true);
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            return;
+            Tester.ABTest_h(10000, 10000, 3000, 15, 15, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\adad\\", 0, 1, -1, "-3 for divided by 2");
+            return;
+            Tester.ABTest_PCA(35000, 35000, 10000, 30, 30, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid13\\", 0, 1, -1, "no LSH, nodenode m1");
+            //Matrix simMat = loadedpca.transform(20, 0);
+            return;
+            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed20.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed20.log");
+            
+            //ad-ad with mean=1 normalization
+            Tester.ABTest_nl(10000, 20000, 3000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\adad\\", 0, 1, -1, "no LSH, adad m1", true, 1);
+            //node-node with mean=1 normalization
+            //Tester.ABTest_nl(10000, 20000, 3000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\nodenode\\", 1, 0, -1, "no LSH, nodenode m1", true, 1);
+            
+            //ad-ad with mean=1 normalization, using row avg instead of colavg
+            //Tester.ABTest_nl(10000, 20000, 3000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\adadrowavg\\", 1, 0, -1, "no LSH, nodenode m1 rowavg", true, 1);
+            
+            
+            
+            //return;
             Tester.ABTest_PCA(10000, 10000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid11\\", 0, 1, -1, "-1 for mean 0 norm");
+            
+            
             /*
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log");
             Tester.ABTest_n(10000, 30000, 10000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid9\\", 0, 1, -1, "0 for nonorm", false);
@@ -135,7 +292,7 @@ namespace CF
             Tester.ABTest_h(10000, 10000, 1000, -16, -16, 1, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\hybrid7\\", 0, 1);
             
             return;
-            preMat pMa = new preMat(5, 5);
+            M1Matrix pMa = new M1Matrix(5, 5);
             pMa.set(0, 0, 0.2);
             pMa.set(3, 0, 1);
             pMa.set(0, 1, 0);
@@ -362,7 +519,6 @@ namespace CF
             stream.Close();
             return rtn;
         }
-
 
 
         public static void accumulateResult(string inputPath, string outputPath)

@@ -16,9 +16,9 @@ namespace CF
         private Matrix cached_predictions;
         private Matrix raw;
         private double baselrate = 0.001;
-        private double[] eigenValues;
+        public double[] eigenValues;
         private double[] rowMean;
-        public PCA(Matrix raw, int dims = 50)
+        public PCA(Matrix raw, int dims = 30)
         {
             this.raw = raw;
             numFeatures = dims;
@@ -49,7 +49,7 @@ namespace CF
         public void compute()
         {
             preprocess();
-            int iterations = 100000;
+            int iterations = 500000;
 
             for (int feature = 0; feature < numFeatures; feature++)
             {
@@ -59,7 +59,7 @@ namespace CF
                 while (!converged)
                 {
                     double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
-                    //Console.WriteLine(counter);
+                    //Console.WriteLine(""+feature+"\t"+counter);
                     double max_err = 0;
                     foreach (int col in cached_predictions.getCols())
                         foreach (int row in cached_predictions.getRowsOfCol(col))
@@ -78,10 +78,12 @@ namespace CF
                 foreach (int col in cached_predictions.getCols())
                     foreach (int row in cached_predictions.getRowsOfCol(col))
                         cached_predictions.set(row, col, predictRating(row, col, feature));
+                IO.save(this, "C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_" + feature);
             }
             normalize();
             //postprocess();
         }
+
         private void preprocess()
         {
             rowMean = new double[raw.GetLength(0)];
@@ -132,7 +134,7 @@ namespace CF
             return feature_row;
         }
 
-        private void normalize()
+        public void normalize()
         {
             this.eigenValues = new double[numFeatures];
             for (int i = 0; i < eigenValues.Length; i++)

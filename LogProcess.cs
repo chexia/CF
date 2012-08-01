@@ -14,22 +14,26 @@ namespace CF
     class LogProcess
     {
         //for block test
-        public static int[] cleanLogs0(string in_mavc, string in_msi, string in_iavc, string out_mavc = "mavc_processed.log", string out_msi = "msi_processed.log", string out_iavc = "iavc_processed.log")
+        public static int[] cleanLogs0(string in_test, string in_train, string in_sim, string out_test = "test_processed.log", string out_train = "train_processed.log", string out_sim = "sim_processed.log")
         {
-            IntegerMap m2int = new IntegerMap();
-            m2int.add(in_mavc, 0);
-            m2int.add(in_msi, 0);
             IntegerMap i2int = new IntegerMap();
-            i2int.add(in_msi, 2);
-            i2int.add(in_iavc, 0);
+            i2int.add(in_test, 0);
+            i2int.add(in_train, 0);
             IntegerMap a2int = new IntegerMap();
-            a2int.add(in_mavc, 1);
-            a2int.add(in_iavc, 1);
-            rewrite(in_mavc, out_mavc, standardProcessor, m2int, a2int);
-            rewrite(in_msi, out_msi, standardProcessor2, m2int, i2int);
-            rewrite(in_iavc, out_iavc, standardProcessor, i2int, a2int);
-            return new int[3] { m2int.getCount(), i2int.getCount(), a2int.getCount() };
+            a2int.add(in_test, 1);
+            a2int.add(in_train, 1);
+
+            IntegerMap u2int = new IntegerMap();
+            u2int.add(in_sim, 0);
+
+            rewrite(in_test, out_test, standardProcessor, i2int, a2int);
+            rewrite(in_train, out_train, standardProcessor, i2int, a2int);
+            rewrite(in_sim, out_sim, standardProcessor, u2int, a2int);
+
+            Console.WriteLine("{0},{1}", i2int.getCount(), a2int.getCount());
+            return new int[2] { i2int.getCount(), a2int.getCount() };
         }
+
         public static int[] cleanLogs1(string in_test, string in_train, string out_test = "test_processed.log", string out_train = "train_processed.log")
         {
             IntegerMap i2int = new IntegerMap();
@@ -38,6 +42,7 @@ namespace CF
             IntegerMap a2int = new IntegerMap();
             a2int.add(in_test, 1);
             a2int.add(in_train, 1);
+
 
             rewrite(in_test, out_test, standardProcessor, i2int, a2int);
             rewrite(in_train, out_train, standardProcessor, i2int, a2int);
@@ -51,6 +56,9 @@ namespace CF
             StreamWriter writer = File.CreateText(outputFilePath);
             foreach (string line in logenum)
             {
+                string[] tokens = line.Split(new char[] { '\t' });
+                if (tokens.Length < 4)
+                    continue;
                 string outputStr = processor(line, rowMap, colMap);
                 writer.WriteLine(outputStr);
             }

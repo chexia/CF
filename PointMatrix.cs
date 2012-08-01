@@ -38,7 +38,6 @@ namespace CF
             this.rownum = rownum;
             this.colnum = colnum;
             this.sourceMatrix = new Dictionary<int, Dictionary<int, double>>();
-            colnum = rownum = 0;
         }
 
         /// <summary>

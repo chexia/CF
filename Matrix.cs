@@ -17,6 +17,7 @@ namespace CF
     [Serializable()]
     class Matrix : PointMatrix
     {
+        public double[] rowAvg;
         /// <summary>
         /// The average value for each column. The average value = (sum of all known entries in given column)/(number of known entries in given column)
         /// note: may want to try weighted average later on.
@@ -187,16 +188,16 @@ namespace CF
             Dictionary<int, double> col2 = sourceMatrix[colInd2];
             foreach (int row in col1.Keys)
             {
-                sum1 += Math.Abs(this.get(row, colInd1));
+                sum1 += 1;
                 if (this.sourceMatrix[colInd2].ContainsKey(row))
-                    overlapSum += (Math.Abs(col1[row]) + Math.Abs(col2[row]));
+                    overlapSum += 1;
             }
             foreach (int row in col2.Keys)
             {
-                sum2 += Math.Abs(col2[row]);
+                sum2 += 1;
             }
-            double rtn = overlapSum / (sum1 + sum2);
-            if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads, not sure if this is the right way to handle
+            double rtn = overlapSum / (sum1 + sum2 - overlapSum);
+            if (Double.IsNaN(rtn)) //this happens when 0 divides 0, possibly two empty intents who clicked on no ads
                 rtn = 0;
             if (rtn < 0)
                 throw new Exception("should not be the case");
