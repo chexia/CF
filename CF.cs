@@ -71,7 +71,6 @@ namespace CF
 
             if (Double.IsNaN(rtn))
                 rtn = this.utilMat.setAvg[col]; //added
-            
             //return utilMat.setAvg[col];
             return rtn;
 

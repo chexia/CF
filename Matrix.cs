@@ -41,7 +41,7 @@ namespace CF
             setDev = new double[numCol];
             for (int i = 0; i < numCol; i++)
             {
-                setAvg[i] = 0;
+                setAvg[i] = 1;
                 setDev[i] = 1;
             }
             if (points != null)
@@ -110,7 +110,7 @@ namespace CF
                         continue;
                     else
                     {
-                        double nv = (this.get(row, col) - avg) / std;
+                        double nv = (this.get(row, col)) / avg;
                         if (double.IsNaN(nv))
                             nv=0;
                         this.set(row, col, nv);
@@ -128,7 +128,7 @@ namespace CF
         /// <returns>de-normalized value</returns>
         public virtual double deNorm(int row, int col, double value)
         {
-            return value * this.setDev[col] + this.setAvg[col];
+            return value * this.setAvg[col];
         }
 
 
@@ -206,17 +206,17 @@ namespace CF
 
 
         /// <summary>
-        /// Overloaded similarity function for an entire array of columns to compare with a principal column
+        /// Overloaded similarity function for an entire array of columns to compare with an active column
         /// returns an array of similarity scores
         /// </summary>
-        /// <param name="principal">index of "principal column", against which all other columns are compared</param>
+        /// <param name="activeCol">index of "active column", against which all other columns are compared</param>
         /// <param name="neighbors">array of indices for neighbor columns</param>
         /// <returns>Array of similarity scores, product of cosineSim and jacSim</returns>
-        public virtual double[] sim(int principal, int[] neighbors)
+        public virtual double[] sim(int activeCol, int[] neighbors)
         {
             double[] rtn = new double[neighbors.Length];
             for (int i = 0; i < neighbors.Length; i++)
-                rtn[i] = this.cosineSim(principal, neighbors[i]) * this.jacSim(principal, neighbors[i]);
+                rtn[i] = this.cosineSim(activeCol, neighbors[i]) * this.jacSim(activeCol, neighbors[i]);
             return rtn;
         }
 

@@ -6,7 +6,7 @@ using System.Text;
 namespace CF
 {
     [Serializable()]
-    class PCAMatrix: M1Matrix
+    class PCAMatrix: Matrix
     {
 
         private Matrix simMat;

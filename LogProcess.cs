@@ -30,7 +30,11 @@ namespace CF
             rewrite(in_train, out_train, standardProcessor, i2int, a2int);
             rewrite(in_sim, out_sim, standardProcessor, u2int, a2int);
 
-            Console.WriteLine("{0},{1}", i2int.getCount(), a2int.getCount());
+            int counter = 0;
+            foreach (string line in new LogEnum(in_sim))
+                counter++;
+
+            Console.WriteLine("{0},{1},{2}", i2int.getCount(), a2int.getCount(),counter);
             return new int[2] { i2int.getCount(), a2int.getCount() };
         }
 

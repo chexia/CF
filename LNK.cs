@@ -105,9 +105,6 @@ namespace CF
             // initialize A
             foreach (double[] point in points)
             {
-                int bbb = 0;
-                if (point[0] == 37 && point[1] == 17)
-                    bbb = 1;
                 A[(int)point[0], (int)point[1]] = point[2];
             }
 

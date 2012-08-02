@@ -56,7 +56,8 @@ namespace CF
                 double APE;
                 double trueVal = testPoints.get(row, col);
                 double predictedVal = filter.predict(row, col);
-
+                if (Double.IsNaN(predictedVal))
+                    predictedVal = 0;
                 //
                 //predictedVal = (predictedVal - filter.utilMat.setAvg[col]);
                 //trueVal = trueVal - filter.utilMat.setAvg[col];
@@ -78,6 +79,7 @@ namespace CF
                     else
                         APE = 1;
                 }
+
                 lock (writer)
                 {
                     writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", APE, row, col,predictedVal,trueVal);
@@ -139,7 +141,7 @@ namespace CF
                         numvalidentries += 1;
                     }
 
-                    Matrix utilMat = normMode == 0 ? new Matrix(maxRow + 1, maxCol + 1, points) : new M1Matrix(maxRow + 1, maxCol + 1, points);
+                    Matrix utilMat = normMode == 0 ? new Matrix(maxRow + 1, maxCol + 1, points) : new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat, false, normalization);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
@@ -195,7 +197,7 @@ namespace CF
                         numvalidentries += 1;
                     }
 
-                    Matrix utilMat = normMode == 0 ? new Matrix(maxRow + 1, maxCol + 1, points) : new M1Matrix(maxRow + 1, maxCol + 1, points);
+                    Matrix utilMat = normMode == 0 ? new Matrix(maxRow + 1, maxCol + 1, points) : new Matrix(maxRow + 1, maxCol + 1, points);
 
                     CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
@@ -254,62 +256,6 @@ namespace CF
 
                     Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
 
-                    CF filter = new CF(utilMat, false, normalization);//, true, 10, 20, false);
-                    Console.WriteLine("Check 3");
-                    //filter.buildModel();
-                    Tester tester = new Tester(filter, testPts);
-                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
-                    Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
-                    reader.Close();
-                }
-            }
-
-            Console.WriteLine("debug: completed AB");
-        }
-
-        public static void ABTest_hn1(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string notes = null, bool normalization = true)
-        {
-            StreamWriter notesWriter = new StreamWriter(outputPrefix + "notes.txt", true);
-            notesWriter.WriteLine(notes);
-            notesWriter.Close();
-            StreamReader reader = File.OpenText(testPath);
-            List<double[]> points = new List<double[]>();
-
-            reader.Close();
-            Console.WriteLine("Check 1");
-            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
-            Console.WriteLine("check 2");
-
-            for (int vreq = s; vreq <= e; vreq += step)
-            {
-                for (int creq = s2; creq <= e2; creq += step2)
-                {
-                    int numvalidentries = 0;
-                    reader = File.OpenText(string.Format(trainPath));
-                    points = new List<double[]>();
-                    LogEnum logenum = new LogEnum(trainPath);
-                    int maxRow = 0;
-                    int maxCol = 0;
-                    foreach (string line in logenum)
-                    {
-                        string[] tokens = line.Split(new char[] { '\t' });
-                        double clicks = 0;
-                        double views = 0;
-                        if (valPos == -1)
-                        {
-                            clicks = Double.Parse(tokens[3]);
-                            views = Double.Parse(tokens[2]);
-                        }
-                        if (views < vreq || clicks < creq)
-                            continue;
-                        maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
-                        maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
-                        points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
-                        numvalidentries += 1;
-                    }
-
-                    M1Matrix utilMat = new M1Matrix(maxRow + 1, maxCol + 1, points);
-
                     CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
                     Console.WriteLine("Check 3");
                     //filter.buildModel();
@@ -322,6 +268,7 @@ namespace CF
 
             Console.WriteLine("debug: completed AB");
         }
+
 
         public static void testPCA()
         {
@@ -422,6 +369,7 @@ namespace CF
             LogEnum logenum = new LogEnum(trainPath);
             int maxRow = 0;
             int maxCol = 0;
+            Random rand = new Random();
             foreach (string line in logenum)
             {
                 string[] tokens = line.Split(new char[] { '\t' });
@@ -436,7 +384,10 @@ namespace CF
                     continue;
                 maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
                 maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
-                points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                double ctr = Math.Min(clicks, views) / (views+1);
+                if (rand.NextDouble() < 0.1)
+                    continue;
+                points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? ctr : Double.Parse(tokens[2]) });
                 numvalidentries += 1;
             }
 
@@ -593,9 +544,6 @@ namespace CF
         {
             int principalIntent = 0;
             double principalScore = double.MinValue;
-
-            double ctrSum = 0;
-            double denom = 0;
 
             foreach (int intent in intent_muid.sourceMatrix[user].Keys)
             {

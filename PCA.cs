@@ -37,6 +37,7 @@ namespace CF
                 double counter = 0;
                 foreach (int row in raw.getRowsOfCol(col))
                 {
+                    double a = raw.get(row, col);
                     sum += raw.get(row, col);
                     if (double.IsNaN(sum))
                         Console.Write(1);
@@ -49,7 +50,7 @@ namespace CF
         public void compute()
         {
             preprocess();
-            int iterations = 500000;
+            int iterations = 10000;
 
             for (int feature = 0; feature < numFeatures; feature++)
             {
@@ -83,7 +84,43 @@ namespace CF
             normalize();
             //postprocess();
         }
+        public void cont_compute(int s)
+        {
+            preprocess();
+            int iterations = 10000;
 
+            for (int feature = s; feature < numFeatures; feature++)
+            {
+                //Console.WriteLine(feature);
+                int counter = 0;
+                bool converged = false;
+                while (!converged)
+                {
+                    double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
+                    //Console.WriteLine(""+feature+"\t"+counter);
+                    double max_err = 0;
+                    foreach (int col in cached_predictions.getCols())
+                        foreach (int row in cached_predictions.getRowsOfCol(col))
+                        {
+                            double err = lrate * (raw.get(row, col) - predictRating(row, col, feature));
+                            double fr = feature_row[feature, row];
+                            feature_row[feature, row] = fr + err * feature_col[feature, col];
+                            feature_col[feature, col] = feature_col[feature, col] + err * fr;
+                            max_err = Math.Max(err, max_err);
+                        }
+                    counter++;
+                    if (counter > iterations)
+                        converged = true;
+
+                }
+                foreach (int col in cached_predictions.getCols())
+                    foreach (int row in cached_predictions.getRowsOfCol(col))
+                        cached_predictions.set(row, col, predictRating(row, col, feature));
+                IO.save(this, "C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_" + feature);
+            }
+            normalize();
+            //postprocess();
+        }
         private void preprocess()
         {
             rowMean = new double[raw.GetLength(0)];
