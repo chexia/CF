@@ -78,7 +78,7 @@ namespace CF
         }
 
         /// <summary>
-        /// Normalizes the columns, such that the average is 1 and the standard deviation is 0.
+        /// Normalizes the columns, such that the average is 1.
         /// </summary>
         public virtual void normalize()
         {

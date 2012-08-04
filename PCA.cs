@@ -60,7 +60,7 @@ namespace CF
                 while (!converged)
                 {
                     double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
-                    //Console.WriteLine(""+feature+"\t"+counter);
+                    Console.WriteLine(""+feature+"\t"+counter);
                     double max_err = 0;
                     foreach (int col in cached_predictions.getCols())
                         foreach (int row in cached_predictions.getRowsOfCol(col))
@@ -84,9 +84,28 @@ namespace CF
             normalize();
             //postprocess();
         }
+
+        public void expandFeatures(int new_numFeatures)
+        {
+            if (new_numFeatures < this.numFeatures)
+                throw new ArgumentException("must have larger number of features");
+            double[,] new_feature_row = new double[new_numFeatures, raw.GetLength(0)];
+            for (int feature = 0; feature < feature_row.GetLength(0); feature++)
+                for (int row = 0; row < feature_row.GetLength(1); row++)
+                    new_feature_row[feature, row] = feature_row[feature, row];
+            this.feature_row = new_feature_row;
+            double[,] new_feature_col = new double[new_numFeatures, raw.GetLength(1)];
+            for (int feature = 0; feature < feature_col.GetLength(0); feature++)
+                for (int col = 0; col < feature_col.GetLength(1); col++)
+                    new_feature_col[feature, col] = feature_col[feature, col];
+            this.feature_col = new_feature_col;
+            double[] new_eigenValues = new double[new_numFeatures];
+            this.numFeatures = new_numFeatures;
+
+        }
+
         public void cont_compute(int s)
         {
-            preprocess();
             int iterations = 10000;
 
             for (int feature = s; feature < numFeatures; feature++)
@@ -97,7 +116,7 @@ namespace CF
                 while (!converged)
                 {
                     double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
-                    //Console.WriteLine(""+feature+"\t"+counter);
+                    Console.WriteLine(""+feature+"\t"+counter);
                     double max_err = 0;
                     foreach (int col in cached_predictions.getCols())
                         foreach (int row in cached_predictions.getRowsOfCol(col))

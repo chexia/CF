@@ -17,13 +17,13 @@ namespace CF
 
             if (inputPCA == null)
             {
-                PCA pca = new PCA(this, 30);
+                PCA pca = new PCA(this, 50);
                 pca.compute();
                 this.simMat = pca.transform();
             }
             else
             {
-                this.simMat = inputPCA.transform(29, 0);
+                this.simMat = inputPCA.transform(50, 0);
             }
         }
 

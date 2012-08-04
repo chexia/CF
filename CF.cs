@@ -64,7 +64,7 @@ namespace CF
             Tuple<int[], double[]> ns = this.getNeighborsScores(col, row);
             int[] kneighbors = ns.Item1;
             double[] ksimMeasure = ns.Item2;
-            double rtn = this.predict(kneighbors, ksimMeasure, row, col, 5);
+            double rtn = this.predict(kneighbors, ksimMeasure, row, col, 30);
 
             //added
             
@@ -93,6 +93,7 @@ namespace CF
 
         /// <summary>
         /// Constructs the model offline. This allows future predictions to be done in constant time (only a hashtable lookup is necessary).
+        /// Never used it much because it is too slow for testing purposes.
         /// </summary>
         /// <param name="k">k defines number of nearest neighbors to be used during model construction (for detailed use see predict)</param>
         public void buildModel(int k = 5)
@@ -121,7 +122,7 @@ namespace CF
 
                     for (int row = 0; row < utilMat.GetLength(0); row++)
                     {
-                        Double prediction = this.predict(neighbors, simScores, row, (int)col, 5);
+                        Double prediction = this.predict(neighbors, simScores, row, (int)col, k);
                         //prediction = prediction *utilMat.setDev[col] + utilMat.setAvg[col];
                         if (!Double.IsNaN(prediction))
                         {

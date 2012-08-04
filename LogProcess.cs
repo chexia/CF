@@ -22,6 +22,7 @@ namespace CF
             IntegerMap a2int = new IntegerMap();
             a2int.add(in_test, 1);
             a2int.add(in_train, 1);
+            a2int.add(in_sim, 1);
 
             IntegerMap u2int = new IntegerMap();
             u2int.add(in_sim, 0);

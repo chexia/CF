@@ -48,6 +48,8 @@ namespace CF
         /// <returns>the value of the entry at (row, col), or double.NaN if matrix does not contain given entry</returns>
         public double get(int row, int col)
         {
+            if (row < 0 || row >= this.rownum || col < 0 || col >= this.colnum)
+                throw new ArgumentException("attempt to get out-of-bounds item");
             if (!sourceMatrix.ContainsKey(col))
                 return double.NaN;
             if (!(sourceMatrix[col].ContainsKey(row)))
@@ -62,6 +64,8 @@ namespace CF
         /// <param name="value">value to be set</param>
         public void set(int row, int col, double value)
         {
+            if (row < 0 || row >= this.rownum || col < 0 || col >= this.colnum)
+                throw new ArgumentException("attempt to set out-of-bounds item");
             if (!sourceMatrix.ContainsKey(col))
                 sourceMatrix.Add(col, new Dictionary<int, double>());
             sourceMatrix[col][row] = value;

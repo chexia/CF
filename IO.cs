@@ -56,9 +56,42 @@ namespace CF
         }
         static void Main(string[] args)
         {
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed30.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed30.log");
+            Tester.ABTest_h(10000, 10000, 2000, -100, -100, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final16\\", 0, 1, -1, "using all information", true);
+            return;
+            Tester.ABTest_h(10000, 10000, 2000, -100, -100, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed19.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final15\\", 0, 1, -1, "-100 for 100 nn", true);
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log");
+            baselinePredict("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt");
+            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt.txt");
+            return;
+            //LogProcess.cleanLogs0("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed25.log");
+            //Tester.train_PCA(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log", 0, 1, -1, false);
+            //return;
+            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log");
+            Tester.ABTest_PCA(10000, 20000, 5000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final14\\", 0, 1, -1, "-1 for 50 features");
+            return;
+            aggregateStats(1000, 10000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", "about_*_0.txt.txt");
+            return;
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed23.log");
+            Tester.ABTest_h(1000, 10000, 2000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", 0, 1, -1, "known direct accuracy threshold computation", false);
+
+            return;
+            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt.txt");
+            //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "uavc_test.log", "uavc_train.log");
+            //LogProcess.cleanLogs1("uavc_test.log", "uavc_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log");
+            Tester.ABTest_h(0, 0, 1, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\", 0, 1, -1, "-uavc", true);
+            return;
+            aggregateStats(1000, 15000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final12\\", "about_*_0.txt.txt");
+            return;
+            //LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log");
+            //Tester.ABTest_h(5000, 15000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final12\\", 0, 1, -1, "-3 for -1 norm", true);
+            //return;
             PCA p = (PCA) load("C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_29");
+            p.expandFeatures(60);
             p.cont_compute(30);
-            //LogProcess.cleanLogs0("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed24.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed24.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log");
+            return;
+            LogProcess.cleanLogs0("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed25.log");
             Tester.train_PCA(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log", 0, 1, -1, false);
             return;
             Tester.ABTest_h(10000, 10000, 1000, -3, -3, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", 0, 1, -1, "-3 for -1 norm", true);
@@ -388,6 +421,57 @@ namespace CF
             return;
 
         }
+
+
+        public static void baselinePredict(string in_test, string in_train, string out_results)
+        {
+            LogEnum train = new LogEnum(in_train);
+            LogEnum test = new LogEnum(in_test);
+            Dictionary<int, int> train_views = new Dictionary<int, int>();
+            Dictionary<int, int> train_clicks = new Dictionary<int, int>();
+            foreach (string line in train)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                int ad = Int32.Parse(tokens[1]);
+                int views = Int32.Parse(tokens[2]);
+                int clicks = Int32.Parse(tokens[3]);
+                if (train_views.ContainsKey(ad))
+                {
+                    train_views[ad] += views;
+                    train_clicks[ad] += clicks;
+                }
+                else
+                {
+                    train_views.Add(ad, views);
+                    train_clicks.Add(ad, clicks);
+                }
+            }
+            StreamWriter writer = new StreamWriter(out_results);
+            foreach (string line in test)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                int ad = Int32.Parse(tokens[1]);
+                int views = Int32.Parse(tokens[2]);
+                int clicks = Int32.Parse(tokens[3]);
+                double trueCTR = (double)clicks / (double) views;
+
+                if (!train_clicks.ContainsKey(ad))
+                {
+                    writer.WriteLine(1);
+                    continue;
+                }
+                double predictedCTR = (double)train_clicks[ad] / (double)train_views[ad];
+                if (trueCTR == 0)
+                {
+                    writer.WriteLine(predictedCTR == 0 ? 0 : 1);
+                    continue;
+                }
+                double APE = Math.Abs(trueCTR - predictedCTR) / (trueCTR);
+                writer.WriteLine(APE);
+            }
+            writer.Close();
+        }
+
 
         public static void filterData(string inputPrefix, string genericFilename, int s, int e, int step)
         {

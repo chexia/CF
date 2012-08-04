@@ -153,7 +153,7 @@ namespace CF
         /// Computes signature matrix
         /// </summary>
         /// <param name="utilMat">The matrix that contains the original data</param>
-        private void compSigMatEntries(Matrix utilMat)
+        public void compSigMatEntries(Matrix utilMat)
         {
             int[] bandArr = new int[numBands];
             for (int i = 0; i < numBands; i++)

@@ -19,6 +19,7 @@ namespace CF
         private Matrix testPoints;
         private StreamWriter writer;
         private StreamWriter writer2;
+        private StreamWriter writer3;
         public Tester(CF filter, Matrix testPoints)
         {
             this.filter = filter;
@@ -28,6 +29,7 @@ namespace CF
 
         public void abtest(string outputFilePath)
         {
+            this.writer3 = new StreamWriter(outputFilePath + ".dir");
             this.writer2 = new StreamWriter(outputFilePath + ".avg");
             this.writer = new StreamWriter(outputFilePath);
             Action<int> act = processCol;
@@ -37,6 +39,7 @@ namespace CF
             //    act(key);
             writer.Close();
             writer2.Close();
+            writer3.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
             IO.accumulateResult(outputFilePath + ".avg", outputFilePath + ".avg" + ".txt");
         }
@@ -97,6 +100,21 @@ namespace CF
                             APE = 1;
                     }
                     writer2.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", APE, row, col, filter.utilMat.setAvg[col], trueVal);
+                }
+                lock (writer3)
+                {
+                    predictedVal = this.filter.utilMat.get(row, col);
+                    if (predictedVal == 0)
+                        predictedVal = filter.utilMat.setAvg[col];
+                    APE = Math.Abs(predictedVal - trueVal) / Math.Abs(trueVal);
+                    if (trueVal == 0)
+                    {
+                        if (filter.utilMat.setAvg[col] == 0)
+                            APE = 0;
+                        else
+                            APE = 1;
+                    }
+                    writer3.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", APE, row, col, predictedVal, trueVal);
                 }
             }
         }
@@ -342,7 +360,7 @@ namespace CF
                         numvalidentries += 1;
                     }
 
-                    PCA loadedpca = (PCA)IO.load("C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_29");
+                    PCA loadedpca = (PCA)IO.load("C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_50");
                     loadedpca.normalize();
 
                     PCAMatrix utilMat = new PCAMatrix(maxRow + 1, maxCol + 1, points, loadedpca);
