@@ -100,7 +100,7 @@ namespace CF
                         seenCount++;
                     }
                 }
-                double avg = (double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount;
+                double avg = Math.Abs((double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount);
                 double std = (double.IsNaN(Math.Sqrt(sqsum / seenCount))) ? 0 : Math.Sqrt(sqsum / seenCount);
                 setAvg[col] = avg;
                 setDev[col] = std;
@@ -113,6 +113,8 @@ namespace CF
                         double nv = (this.get(row, col)) / avg;
                         if (double.IsNaN(nv))
                             nv=0;
+                        if (avg == 0)
+                            nv = this.get(row, col);
                         this.set(row, col, nv);
                     }
                 }
@@ -128,6 +130,8 @@ namespace CF
         /// <returns>de-normalized value</returns>
         public virtual double deNorm(int row, int col, double value)
         {
+            if (this.setAvg[col] == 0)
+                return value;
             return value * this.setAvg[col];
         }
 

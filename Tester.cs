@@ -42,6 +42,7 @@ namespace CF
             writer3.Close();
             IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
             IO.accumulateResult(outputFilePath + ".avg", outputFilePath + ".avg" + ".txt");
+            IO.accumulateResult(outputFilePath + ".dir", outputFilePath + ".dir" + ".txt");
         }
         private void aggregateResult(List<double> local)
         {
@@ -59,8 +60,7 @@ namespace CF
                 double APE;
                 double trueVal = testPoints.get(row, col);
                 double predictedVal = filter.predict(row, col);
-                if (Double.IsNaN(predictedVal))
-                    predictedVal = 0;
+                //predictedVal = predictedVal * 0.85 + (filter.utilMat.contains(row, col) ? filter.utilMat.deNorm(row, col, filter.utilMat.get(row, col)) : predictedVal) * 0.15;
                 //
                 //predictedVal = (predictedVal - filter.utilMat.setAvg[col]);
                 //trueVal = trueVal - filter.utilMat.setAvg[col];
@@ -104,12 +104,14 @@ namespace CF
                 lock (writer3)
                 {
                     predictedVal = this.filter.utilMat.get(row, col);
-                    if (predictedVal == 0)
+                    if (double.IsNaN(predictedVal))
                         predictedVal = filter.utilMat.setAvg[col];
+                    else
+                        predictedVal = filter.utilMat.deNorm(row, col, predictedVal);
                     APE = Math.Abs(predictedVal - trueVal) / Math.Abs(trueVal);
                     if (trueVal == 0)
                     {
-                        if (filter.utilMat.setAvg[col] == 0)
+                        if (predictedVal == 0)
                             APE = 0;
                         else
                             APE = 1;

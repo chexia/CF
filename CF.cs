@@ -51,7 +51,10 @@ namespace CF
             if (this.utilMat.contains(row, col))
             {
                 //throw new Exception("training set test set overlap");
-                return utilMat.deNorm(row, col, this.utilMat.get(row, col));
+                
+                //return utilMat.deNorm(row, col, this.utilMat.get(row, col));
+                if (utilMat.deNorm(row, col, this.utilMat.get(row, col)) == 0)
+                    return 0;
             }
             if (this.predictionResults != null)
             {
