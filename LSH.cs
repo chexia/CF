@@ -94,6 +94,7 @@ namespace CF
             if (candidates.Contains(col))
                 candidates.Remove(col);
             Console.WriteLine(candidates.Count);
+            Console.WriteLine(col);
             return candidates.ToArray<int>();
         }
         /// <summary>

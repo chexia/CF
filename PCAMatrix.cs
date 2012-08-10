@@ -56,4 +56,32 @@ namespace CF
 
 
     }
+    class MFCF : CF
+    {
+        private PCA pca;
+        public MFCF(PCA pca, Matrix utilmat) : base(utilmat, false, false)
+        {
+            
+            this.pca=pca;
+        }
+        public override double predict(int row, int col)
+        {
+            double rtn = 0;
+            if (row >= pca.feature_row.GetLength(1) || col >= pca.feature_col.GetLength(1))
+                return 0;
+            for (int i = 0; i < 30; i++)
+            {
+                if (pca.feature_row[i, row] == 0.1 || pca.feature_col[i, col] == 0.1)
+                    continue;
+                rtn += pca.feature_row[i, row] * pca.feature_col[i, col];
+            }
+            return rtn;
+            if (double.IsNaN(pca.cached_predictions.get(row, col)))
+            {
+                return rtn;
+            }
+            return pca.cached_predictions.get(row,col);
+            //return pca.raw.deNorm(row, col, rtn);
+        }
+    }
 }

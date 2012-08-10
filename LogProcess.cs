@@ -64,6 +64,8 @@ namespace CF
                 string[] tokens = line.Split(new char[] { '\t' });
                 if (tokens.Length < 4)
                     continue;
+                //if (string.Equals(tokens[3], "0"))
+                    //continue;
                 string outputStr = processor(line, rowMap, colMap);
                 writer.WriteLine(outputStr);
             }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Collections;
 using Wintellect.PowerCollections;
 using System.Threading.Tasks;
-
+using System.IO;
 namespace CF
 {
     [Serializable()]
@@ -44,18 +44,18 @@ namespace CF
         /// <param name="row">The row index of the utilMat entry you want to predict.</param>
         /// <param name="col">The column index of the utilMat entry you want to predict.</param>
         /// <returns>The predicted value at utilMat(row, col). If unable to make prediction, return Double.NaN. </returns>
-        public double predict(int row, int col)
+        public virtual double predict(int row, int col)
         {
             if (!this.utilMat.sourceMatrix.ContainsKey(col))
                 return double.NaN;
-            if (this.utilMat.contains(row, col))
-            {
+            //if (this.utilMat.contains(row, col))
+            //{
                 //throw new Exception("training set test set overlap");
                 
                 //return utilMat.deNorm(row, col, this.utilMat.get(row, col));
-                if (utilMat.deNorm(row, col, this.utilMat.get(row, col)) == 0)
-                    return 0;
-            }
+                //if (utilMat.deNorm(row, col, this.utilMat.get(row, col)) == 0)
+                //    return 0;
+            //}
             if (this.predictionResults != null)
             {
                 if (this.predictionResults.contains(row, col))
@@ -73,10 +73,15 @@ namespace CF
             
 
             if (Double.IsNaN(rtn))
-                rtn = this.utilMat.setAvg[col]; //added
+                rtn = this.defaultPrediction(row, col); //added
             //return utilMat.setAvg[col];
             return rtn;
 
+        }
+
+        public double defaultPrediction(int row, int col)
+        {
+            return this.utilMat.setAvg[col];
         }
 
         public string toString()
@@ -255,12 +260,19 @@ namespace CF
         {
             double rtn = 0;
             double sum = 0;
+            //double sum = 1;
+            //StreamWriter writer = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\val" + col + ".txt", true);
+            //writer.WriteLine("---");
             double normalization_factor = 0;
             for (int i = 0, j = 0; i < neighbors.Length && j < k; i++)
             {
                 int ncol = neighbors[i];
                 if (ncol == -1)
                     throw new Exception("invalid neighbor index");
+                // added for geometric mean
+                //if (utilMat.get(row, ncol) == 0 || simScores[i]==0)
+                //    continue;
+                //
                 if (!utilMat.contains(row, ncol))
                     continue;
 
@@ -270,16 +282,105 @@ namespace CF
                     double simScore = simScores[i];
                     sum += value * simScore;
                     normalization_factor += Math.Abs(simScore);
+                    //writer.WriteLine(value);
+                    //sum *= Math.Pow(value, simScore);
+                    //normalization_factor += Math.Abs(simScore);
                     j++;
                 }
             }
 
+            //writer.Close();
+
             rtn = sum / normalization_factor;
+            //rtn = Math.Pow(sum, 1 / normalization_factor);
             if (double.IsNaN(rtn))
                 return Double.NaN;
             rtn = utilMat.deNorm(row, col, rtn);
             return rtn;
 
+        }
+        /*
+        public double predict(int[] neighbors, double[] simScores, int row, int col, int k)
+        {
+            double rtn = 0;
+            //double sum = 0;
+            double sum = 1;
+            double normalization_factor = 0;
+            for (int i = 0, j = 0; i < neighbors.Length && j < k; i++)
+            {
+                int ncol = neighbors[i];
+                if (ncol == -1)
+                    throw new Exception("invalid neighbor index");
+                // added for geometric mean
+                if (utilMat.get(row, ncol) == 0 || simScores[i]==0)
+                    continue;
+                //
+                if (!utilMat.contains(row, ncol))
+                    continue;
+
+                else
+                {
+                    double value = utilMat.get(row, ncol);
+                    double simScore = simScores[i];
+                    //sum += value * simScore;
+                    //normalization_factor += Math.Abs(simScore);
+                    sum *= Math.Pow(value, simScore);
+                    normalization_factor += Math.Abs(simScore);
+                    j++;
+                }
+            }
+
+            //rtn = sum / normalization_factor;
+            rtn = Math.Pow(sum, 1 / normalization_factor);
+            if (double.IsNaN(rtn))
+                return Double.NaN;
+            rtn = utilMat.deNorm(row, col, rtn);
+            return rtn;
+
+        }
+        */
+        public void iterate(int count)
+        {
+            Matrix tmpMat = new Matrix(utilMat.GetLength(0), utilMat.GetLength(1));
+            for (int i = 0; i < count; i++)
+            {
+                Parallel.ForEach<int, Matrix>(this.utilMat.getCols(), () => { return new Matrix(this.utilMat.GetLength(0), this.utilMat.GetLength(1)); }, (col, state, localUtilMat) =>
+                {
+                    Tuple<int[], double[]> ns;
+                    lock(this.utilMat){
+                    ns = this.getNeighborsScores(col);
+                    }
+                    int[] neighbors = ns.Item1;
+                    double[] scores = ns.Item2;
+                    foreach (int row in this.utilMat.getRowsOfCol(col))
+                    {
+                        double prediction = this.predict(neighbors, scores, row, col, 30) / utilMat.setAvg[col];
+                        if (!double.IsNaN(prediction))
+                        {
+                            localUtilMat.set(row,col,prediction);
+                        }
+                    }
+                    return localUtilMat;
+                },
+                (localUtilMat)=>
+                {
+                    lock(tmpMat){
+                    foreach (int col in localUtilMat.getCols())
+                        foreach (int row in localUtilMat.getRowsOfCol(col))
+                        {
+                            //if (this.utilMat.get(row,col)==0)
+                                //this.utilMat.set(row, col, localUtilMat.get(row, col));
+                            //if (this.utilMat.get(row, col) != 0)
+                                tmpMat.set(row, col, localUtilMat.get(row, col));
+                                //tmpMat.set(row, col, 0.5 * this.utilMat.get(row, col) + 0.5 * localUtilMat.get(row, col));
+                            //else
+                                //tmpMat.set(row, col, 0);
+                        }
+                    }
+                });
+            }
+            this.utilMat.sourceMatrix = tmpMat.sourceMatrix;
+            this.myLSH = new LSH(this.utilMat, 10, 20, this);
         }
 
         #endregion 

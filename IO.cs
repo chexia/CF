@@ -54,12 +54,137 @@ namespace CF
             }
             writer.Close();
         }
+        public static void examinePCA(string testPath, string pcaPath)
+        {
+            PCA pca = (PCA)load("C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\mat_fac_big_25");
+            StreamWriter writer = new StreamWriter("pcaout");
+            LogEnum lon = new LogEnum(testPath);
+            foreach (string line in lon)
+            {
+                string[] tokens = line.Split(new char[]{'\t'});
+                double ctr = (double.Parse(tokens[3])/double.Parse(tokens[2]));
+                int intent = int.Parse(tokens[0]);
+                int ad = int.Parse(tokens[1]);
+                writer.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", ctr, pca.feature_row[0, intent], pca.feature_col[0, ad], pca.feature_row[1, intent], pca.feature_col[1, ad], intent, ad);
+            }
+        }
         static void Main(string[] args)
         {
+            //Tester.ABTest_PCA(15000, 15000, 5000, -2, -2, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final26\\", 0, 1, -1, "-3 for testing on non zero train", true, "C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\mat_fac_big_25");
+            //return;
+            //Tester.ABTest_s(15000, 15000, 1000, -5, -5, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", 0, 1, -1, "-5 for iter once on non zeros", true);
+            //return;
+
+            Tester.ABTest_s(15000, 15000, 1000, -7, -7, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", 0, 1, -1, "-7 for all", true);
+            return;
+            PCA totrain = (PCA)load("C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\mat_fac_big_25");
+            totrain.savePrefix = "C:\\Users\\t-chexia\\Desktop\\ab test final\\smoothed\\mat_fac_big_";
+            totrain.recompute();
+            return;
+
+
+            Tester.ABTest_PCA(15000, 15000, 5000, -2, -2, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final26\\", 0, 1, -1, "-3 for testing on non zero train", true, "C:\\Users\\t-chexia\\Desktop\\ab test final\\mat_fac_big_25");
+            return;
+            examinePCA("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\mat_fac_big_25");
+            return;
+
+            aggregateStats(2000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", "about_*_-2.txt.agg");
+            return;
+            computeRMSE(2000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", "about_*_-1.txt");
+            return;
+            //aggregateStats(2000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\");
+            //return;
+            Tester.ABTest_s(2000, 50000, 2000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", 0, 1, -1, "-1 for comparison", true);
+            return;
+
+
+
+            Tester.ABTest_s(7000, 10000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", 0, 1, -1, "0 for thresholding", true);
+            return;
+            Tester.ABTest_PCA(15000, 15000, 5000, -2, -2, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\mat_fac_big_30", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final26\\", 0, 1, -1, "-2 for actuall pca on train/test", true);
+            return;
+            aggregateStats(10000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\");
+            computeRMSE(10000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\");
+            return;
+
+            return;
+
+            computeRMSE(20000, 30000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final27\\", "about_*_-9.txt");
+            return;
+            //Tester.train_PCA(15000, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", 0, 1, -1);
+            //return;
+
+
+
+
+
+
+
+
+            comDist();
+            produceCumulative("C:\\Users\\t-chexia\\Desktop\\ab test final\\neighborDist.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\neighborDist.txt.txt2");
+            return;
+
+            Tester.ABTest_h(15000, 15000, 5000, -9, -9, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final24\\", 0, 1, -1, "-9 for generating neighbor val distribution", true);
+            return;
+
+            //PCA ase = (PCA)load("C:\\Users\\t-chexia\\Desktop\\ab test final\\mat_fac_0");
+            Tester.train_PCA(15000, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", 0, 1, -1);
+            return;
+            Tester.ABTest_i(15000, 15000, 5000, -5, -5, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final24\\", 0, 1, -1, "-6 for studying distribution", true, 1);
+            return;
+            LogEnum ad = new LogEnum("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed34.log");
+            StreamWriter aa = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed34.log");
+            foreach (string line in ad)
+            {
+                string[] tokens = line.Split(new char[]{'\t'});
+                if (string.Equals(tokens[3], "0"))
+                    continue;
+                aa.WriteLine(line);
+            }
+            aa.Close();
+            return;
+            Tester.showData("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\nodedist5.log", 1, 0, -1);
+            Tester.showData("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\addist5.log", 0, 1, -1);
+            accumulateResult_nc("C:\\Users\\t-chexia\\Desktop\\ab test final\\addist5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\addist5.log.agg");
+            accumulateResult_nc("C:\\Users\\t-chexia\\Desktop\\ab test final\\nodedist5.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\nodedist5.log.agg");
+            return;
+            
+            Tester.ABTest_PCA(15000, 15000, 5000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final25\\", 0, 1, -1, "0 for pca", true);
+            Tester.ABTest_h(15000, 15000, 5000, -1, -1, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final25\\", 0, 1, -1, "-1 for normal", true);
+            return;
+            
+            Tester.ABTest_h(15000, 25000, 5000, -3, -3, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final24\\", 0, 1, -1, "-3 for geometric", true);
+            return;
+            Tester.ABTest_i(15000, 15000, 5000, -2, -2, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final24\\", 0, 1, -1, "-2 has 1 iter, only applied to zeros", true, 1);
+            return;
+
+            LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_7d.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_7d.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed33.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed33.log");
+            return;
+            removeZero("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final22\\", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final20\\", 15000, 15000, 1000);
+            return;
+            Tester.ABTest_h(15000, 15000, 3000, -11, -11, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final23\\", 0, 1, -1, "-11 for not returning 0", true);
+            return;
+
+
+            Tester.ABTest_i(15000, 25000, 3000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final22\\", 0, 1, -1, "this folder is for iteration, geometric average", true, 5);
+            return;
+            removeZero("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final20\\", 15000, 15000, 2000);
+            return;
+            //Tester.ABTest_h(15000, 15000, 1000, -10, -10, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", 0, 1, -1, "-10 checks if back to normal", true);
+            //return;
+            //removeZero("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final20\\", 15000, 15000, 1000);
+
+            Stopwatch a = new Stopwatch();
+            a.Start();
+            Tester.ABTest_i(15000, 15000, 1000, -8, -8, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", 0, 1, -1, "-8 for iteration", true);
+            a.Stop();
+            Console.WriteLine(a.ElapsedMilliseconds);
+            return;
+
             aggregateStats(10000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final20\\", "about_*_0.txt.txt");
             return;
-            removeZero("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final20\\", 2000, 50000, 2000);
-            return;
+
             aggregateStats(2000, 50000, 2000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", "about_*_-1.txt.txt");
             return;
             Tester.ABTest_h(36000, 50000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed32.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final18\\", 0, 1, -1, "up to 50000 for 0", true);
@@ -106,7 +231,42 @@ namespace CF
             baselinePredict("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed30.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed30.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt");
             //
 
+            Tester.testPCA();
+            return;
+            double[,] sourcMatrix = new double[3, 3] { { 1, 4, 7 }, { 2, 5, 8 }, { 3, 6, 12 } };
+            PrincipalComponentAnalysis pa = new PrincipalComponentAnalysis(sourcMatrix);
+            pa.Compute();
+            double[,] ans = pa.Transform(sourcMatrix, 3);
+            for (int row = 0; row < ans.GetLength(1); row++)
+            {
+                Console.WriteLine();
+                for (int col = 0; col < ans.GetLength(0); col++)
+                    Console.Write("\t" + ans[row, col]);
+            }
 
+
+            Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 1 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 4 }, new double[3] { 1, 1, 5 }, new double[3] { 1, 2, 6 }, new double[3] { 2, 0, 7 }, new double[3] { 2, 1, 8 }, new double[3] { 2, 2, 12 } }));
+            PCA pcaa = new PCA(tmat, 3);
+            pcaa.compute();
+            Matrix rcv = pcaa.transform();
+            for (int row = 0; row < rcv.GetLength(1); row++)
+            {
+                Console.WriteLine();
+                for (int col = 0; col < rcv.GetLength(0); col++)
+                    Console.Write("\t" + rcv.get(row, col));
+            }
+            save(pcaa, "testsave");
+            ans = pcaa.rr_eigenvectors();
+            for (int row = 0; row < rcv.GetLength(1); row++)
+            {
+                Console.WriteLine();
+                for (int col = 0; col < rcv.GetLength(0); col++)
+                    Console.Write("\t" + ans[row, col]);
+            }
+            double add = 0;
+            for (int f = 0; f < 3; f++)
+                add += pcaa.feature_col[f, 1] * pcaa.feature_row[f, 2];
+            return;
 
 
 
@@ -121,7 +281,7 @@ namespace CF
             return;
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log");
             baselinePredict("C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt");
-            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt.txt");
+            produceCumulative("C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\baseline.txt.txt");
             return;
             //LogProcess.cleanLogs0("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed25.log");
             //Tester.train_PCA(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log", 0, 1, -1, false);
@@ -135,7 +295,7 @@ namespace CF
             Tester.ABTest_h(1000, 10000, 2000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed23.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", 0, 1, -1, "known direct accuracy threshold computation", false);
 
             return;
-            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt.txt");
+            produceCumulative("C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\about_0_0.txt.txt");
             //split("C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "uavc_test.log", "uavc_train.log");
             //LogProcess.cleanLogs1("uavc_test.log", "uavc_train.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log");
             Tester.ABTest_h(0, 0, 1, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed26.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final13\\", 0, 1, -1, "-uavc", true);
@@ -150,7 +310,7 @@ namespace CF
             p.cont_compute(30);
             return;
             LogProcess.cleanLogs0("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\uavc0119ff3.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed25.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed25.log");
-            Tester.train_PCA(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log", 0, 1, -1, false);
+            Tester.train_PCA(0, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\simProcessed24.log", 0, 1, -1);
             return;
             Tester.ABTest_h(10000, 10000, 1000, -3, -3, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final10\\", 0, 1, -1, "-3 for -1 norm", true);
             return;
@@ -176,7 +336,7 @@ namespace CF
                     writer2.WriteLine(tokens[0]);
             }
             writer2.Close();
-            accumulateResult("C:\\Users\\t-chexia\\Desktop\\ab test final\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\tmpparsed");
+            produceCumulative("C:\\Users\\t-chexia\\Desktop\\ab test final\\tmp", "C:\\Users\\t-chexia\\Desktop\\ab test final\\tmpparsed");
 
 
             return;
@@ -210,7 +370,7 @@ namespace CF
 
             aggregateStats(2000, 15000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final8\\", "about_*_0.txt.txt");
             return;
-            Tester.train_PCA(10000, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", 0, 1, -1, true);
+            Tester.train_PCA(10000, 0, "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed21.log", 0, 1, -1);
             return;
             LogProcess.cleanLogs1("C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_test_100000v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\iavc_train_100v_orm_2.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log");
             Tester.ABTest_h(2000, 15000, 1000, 0, 0, 10, "C:\\Users\\t-chexia\\Desktop\\ab test final\\testProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\trainProcessed22.log", "C:\\Users\\t-chexia\\Desktop\\ab test final\\intersection removed\\final8\\", 0, 1, -1, "adad 1000 to 15000 by 1000 ovrm2 norm to 1 lsh, tests for threshold", true);
@@ -288,37 +448,7 @@ namespace CF
             //aggregateStats(1500, 10000, 1000, "C:\\Users\\t-chexia\\Desktop\\ab test final\\pu\\", "about_*_-1.txt.txt");
             //return;
             */
-            double[,] sourcMatrix = new double[3, 3] {{1,4,7},{2,5,8},{3,6,12}};
-            PrincipalComponentAnalysis pa = new PrincipalComponentAnalysis(sourcMatrix);
-            pa.Compute();
-            double[,] ans = pa.Transform(sourcMatrix, 3);
-            for (int row = 0; row < ans.GetLength(1); row++)
-            {
-                Console.WriteLine();
-                for (int col = 0; col < ans.GetLength(0); col++)
-                    Console.Write("\t"+ans[row, col]);
-            }
 
-
-            Matrix tmat = new Matrix(3, 3, new List<double[]>(new double[][] { new double[3] { 0, 0, 1 }, new double[3] { 0, 1, 2 }, new double[3] { 0, 2, 3 }, new double[3] { 1, 0, 4 }, new double[3] { 1, 1, 5 }, new double[3] { 1, 2, 6 }, new double[3] { 2, 0, 7 }, new double[3] { 2, 1, 8 }, new double[3] { 2, 2, 12 } }));
-            PCA pcaa = new PCA(tmat, 3);
-            pcaa.compute();
-            Matrix rcv = pcaa.transform();
-            for (int row = 0; row < rcv.GetLength(1); row++)
-            {
-                Console.WriteLine();
-                for (int col = 0; col < rcv.GetLength(0); col++)
-                    Console.Write("\t" + rcv.get(row, col));
-            }
-            save(pcaa, "testsave");
-            ans = pcaa.rr_eigenvectors();
-            for (int row = 0; row < rcv.GetLength(1); row++)
-            {
-                Console.WriteLine();
-                for (int col = 0; col < rcv.GetLength(0); col++)
-                    Console.Write("\t" + ans[row, col]);
-            }
-            return;
 
 
             Console.WriteLine("{0}, {1}", ans.GetLength(0), ans.GetLength(1));
@@ -529,13 +659,42 @@ namespace CF
             }
             writer.Close();
         }
+        public static Dictionary<int, double> baselinePredict(string in_train)
+        {
+            LogEnum train = new LogEnum(in_train);
+            Dictionary<int, int> train_views = new Dictionary<int, int>();
+            Dictionary<int, int> train_clicks = new Dictionary<int, int>();
+            foreach (string line in train)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                int ad = Int32.Parse(tokens[1]);
+                int views = Int32.Parse(tokens[2]);
+                int clicks = Int32.Parse(tokens[3]);
+                if (train_views.ContainsKey(ad))
+                {
+                    train_views[ad] += views;
+                    train_clicks[ad] += clicks;
+                }
+                else
+                {
+                    train_views.Add(ad, views);
+                    train_clicks.Add(ad, clicks);
+                }
+            }
+            Dictionary<int, double> rtn = new Dictionary<int, double>();
+            foreach (int key in train_clicks.Keys)
+            {
+                rtn.Add(key, (double) Math.Min(train_clicks[key], train_views[key]) / (double) train_views[key]);
+            }
+            return rtn;
+        }
         public static void removeZero(string inputPrefix, string outputPrefix, int s, int e, int step)
         {
             for (int i = s; i <= e; i += step)
             {
-                string inputPath = inputPrefix + "about_" + i + "_-1" + ".txt";
+                string inputPath = inputPrefix + "about_" + i + "_0_0" + ".txt";
                 LogEnum leb = new LogEnum(inputPath);
-                string outputPath = outputPrefix + "about_" + i + "_-1" + ".txt";
+                string outputPath = outputPrefix + "about_" + i + "_0_0" + ".txt";
                 StreamWriter writer = new StreamWriter(outputPath);
                 foreach (string line in leb)
                 {
@@ -545,7 +704,7 @@ namespace CF
                         writer.WriteLine(line);
                 }
                 writer.Close();
-                accumulateResult(outputPath, outputPath + ".txt");
+                produceCumulative(outputPath, outputPath + ".txt");
             }
             return;
         }
@@ -582,7 +741,7 @@ namespace CF
                         writer.WriteLine(line);
                 }
                 writer.Close();
-                IO.accumulateResult("temp\\" + fileName, "temp\\" + fileName + ".txt");
+                IO.produceCumulative("temp\\" + fileName, "temp\\" + fileName + ".txt");
             }
         }
 
@@ -689,7 +848,7 @@ namespace CF
         }
 
 
-        public static void accumulateResult(string inputPath, string outputPath)
+        public static void produceCumulative(string inputPath, string outputPath)
         {
             int count = 0;
             StreamReader reader = File.OpenText(inputPath);
@@ -718,6 +877,40 @@ namespace CF
                 curr = key;
                 total += bins[key];
                 writer.WriteLine("{0}\t{1}", key * 0.001, ((double)total) / (double)count);
+                prev = key;
+            }
+            writer.Close();
+        }
+
+        public static void produceHistogram(string inputPath, string outputPath)
+        {
+            int count = 0;
+            StreamReader reader = File.OpenText(inputPath);
+            SortedDictionary<double, int> bins = new SortedDictionary<double, int>();
+            string line = reader.ReadLine();
+            while (line != null)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double binNum = Math.Ceiling(Double.Parse(tokens[0]) / 0.1);
+
+                if (bins.ContainsKey(binNum))
+                    bins[binNum] += 1;
+                else
+                    bins.Add(binNum, 1);
+                line = reader.ReadLine();
+                count += 1;
+            }
+            reader.Close();
+            int total = 0;
+            //Console.WriteLine("threshold:{0}\tcount:{1}", i, count);
+            StreamWriter writer = File.CreateText(outputPath);
+            double prev = 0;
+            double curr = 0;
+            foreach (double key in bins.Keys)
+            {
+                curr = key;
+                total += bins[key];
+                writer.WriteLine("{0}\t{1}", key * 0.1, ((double)bins[key]) / (double)count);
                 prev = key;
             }
             writer.Close();
@@ -809,7 +1002,7 @@ namespace CF
         }
 
 
-        public static void aggregateStats(int s, int e, int step, string inputPrefix, string fileName = "about_*.txt", string outName = "aggregated_stats_")
+        public static void aggregateStats(int s, int e, int step, string inputPrefix, string fileName = "about_*_0.txt.agg", string outName = "aggregated_stats_")
         {
             Dictionary<double, double>[] threshold_count = new Dictionary<double, double>[10];
             //string inputPrefix = "705 ab results\\";
@@ -822,7 +1015,6 @@ namespace CF
                     string inputPath = inputPrefix + fn[0] + i + fn[1];
                     StreamReader reader = new StreamReader(inputPath);
                     string line = reader.ReadLine();
-
                     while (line != null)
                     {
                         string[] tokens = line.Split(new Char[] { '\t' });
@@ -849,6 +1041,31 @@ namespace CF
             }
         }
 
+        public static void computeRMSE(int s, int e, int step, string inputPrefix, string fileName = "about_*_0.txt", string outName = "rmse.txt")
+        {
+            double se=0;
+            double n = 0;
+            StreamWriter writer = new StreamWriter(inputPrefix + outName);
+            for (int i = s; i <= e; i += step)
+            {
+                string[] fn = fileName.Split(new char[] { '*' });
+                string inputPath = inputPrefix + fn[0] + i + fn[1];
+                LogEnum le = new LogEnum(inputPath);
+                foreach (string line in le)
+                {
+                    string[] tokens = line.Split(new Char[] { '\t' });
+                    double ape = Double.Parse(tokens[0]);
+                    ape = Math.Min(ape, 1);
+                    double spe = Math.Pow(ape, 2);
+                    se += spe;
+                    n += 1;
+                }
+                double rmse = Math.Sqrt(se / n);
+                writer.WriteLine("" + i + "\t" + rmse);
+            }
+            writer.Close();
+        }
+
         public static void aggregateBlockTest()
         {
             string inputPath = "C:\\Users\\t-chexia\\Desktop\\blocktest\\blockTestOutput.txt";
@@ -858,6 +1075,50 @@ namespace CF
                 string[] tokens = line.Split(new char[] { '\t' });
 
             }
+        }
+        public static void comDist()
+        {
+            StreamWriter writer = new StreamWriter("C:\\Users\\t-chexia\\Desktop\\ab test final\\neighborDist.txt");
+            for (int i = 0; i < 5000; i++)
+            {
+                try
+                {
+                    LogEnum le = new LogEnum("C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\val" + i + ".txt");
+                    List<double> nv = null;
+                    foreach (string line in le)
+                    {
+                        if (string.Equals(line, "---"))
+                        {
+                            if (nv == null)
+                                continue;
+                            double avg = 0;
+                            foreach (double val in nv)
+                                avg += val;
+                            avg /= nv.Count;
+                            avg = Math.Abs(avg);
+                            foreach (double val in nv)
+                            {
+                                if (avg != 0)
+                                {
+                                    double c = val - (avg) / avg;
+                                    writer.WriteLine(Math.Abs(val - avg) / avg);
+                                }
+                            }
+                            nv = null;
+                            continue;
+                        }
+                        if (nv == null)
+                            nv = new List<double>();
+                        if (double.Parse(line) != 0)
+                            nv.Add(Math.Log(double.Parse(line)));
+                    }
+                }
+                catch (Exception e)
+                {
+                    continue;
+                }
+            }
+            writer.Close();
         }
 
     }

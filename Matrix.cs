@@ -102,15 +102,15 @@ namespace CF
                 }
                 double avg = Math.Abs((double.IsNaN(sum / seenCount)) ? 0 : sum / seenCount);
                 double std = (double.IsNaN(Math.Sqrt(sqsum / seenCount))) ? 0 : Math.Sqrt(sqsum / seenCount);
-                setAvg[col] = avg;
-                setDev[col] = std;
+                //setAvg[col] = avg;
+                //setDev[col] = std;
                 foreach (int row in this.getRowsOfCol(col))
                 {
                     if (!this.contains(row, col))
                         continue;
                     else
                     {
-                        double nv = (this.get(row, col)) / avg;
+                        double nv = (this.get(row, col)) / setAvg[col];
                         if (double.IsNaN(nv))
                             nv=0;
                         if (avg == 0)

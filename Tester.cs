@@ -40,9 +40,13 @@ namespace CF
             writer.Close();
             writer2.Close();
             writer3.Close();
-            IO.accumulateResult(outputFilePath, outputFilePath + ".txt");
-            IO.accumulateResult(outputFilePath + ".avg", outputFilePath + ".avg" + ".txt");
-            IO.accumulateResult(outputFilePath + ".dir", outputFilePath + ".dir" + ".txt");
+            IO.produceCumulative(outputFilePath, outputFilePath + ".agg");
+            IO.produceCumulative(outputFilePath + ".avg", outputFilePath + ".avg" + ".agg");
+            IO.produceCumulative(outputFilePath + ".dir", outputFilePath + ".dir" + ".agg");
+            IO.produceHistogram(outputFilePath, outputFilePath + ".hst");
+            IO.produceHistogram(outputFilePath + ".avg", outputFilePath + ".avg" + ".hst");
+            IO.produceHistogram(outputFilePath + ".dir", outputFilePath + ".dir" + ".hst");
+            
         }
         private void aggregateResult(List<double> local)
         {
@@ -91,21 +95,22 @@ namespace CF
 
                 lock (writer2)
                 {
-                    APE = Math.Abs(filter.utilMat.setAvg[col] - trueVal) / Math.Abs(trueVal);
+                    predictedVal = filter.defaultPrediction(row, col);
+                    APE = Math.Abs(predictedVal - trueVal) / Math.Abs(trueVal);
                     if (trueVal == 0)
                     {
-                        if (filter.utilMat.setAvg[col] == 0)
+                        if (predictedVal == 0)
                             APE = 0;
                         else
                             APE = 1;
                     }
-                    writer2.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", APE, row, col, filter.utilMat.setAvg[col], trueVal);
+                    writer2.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}", APE, row, col, predictedVal, trueVal);
                 }
                 lock (writer3)
                 {
                     predictedVal = this.filter.utilMat.get(row, col);
-                    if (double.IsNaN(predictedVal))
-                        predictedVal = filter.utilMat.setAvg[col];
+                    if (double.IsNaN(predictedVal)||predictedVal==0)
+                        predictedVal = filter.defaultPrediction(row, col);
                     else
                         predictedVal = filter.utilMat.deNorm(row, col, predictedVal);
                     APE = Math.Abs(predictedVal - trueVal) / Math.Abs(trueVal);
@@ -289,39 +294,112 @@ namespace CF
             Console.WriteLine("debug: completed AB");
         }
 
-
-        public static void testPCA()
+        public static void ABTest_s(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string notes = null, bool normalization = true)
         {
-            int num = 10;
-            double[,] sourceMatrix = new double[num, num];
-            Random rand = new Random();
-            for (int row = 0; row < num; row++)
-                for (int col = 0; col < num; col++)
-                    sourceMatrix[row, col] = rand.NextDouble();
-            PrincipalComponentAnalysis pa = new PrincipalComponentAnalysis(sourceMatrix);
-            pa.Compute();
-            double[,] ans = pa.Transform(sourceMatrix, num);
+            StreamWriter notesWriter = new StreamWriter(outputPrefix + "notes.txt", true);
+            notesWriter.WriteLine(notes);
+            notesWriter.Close();
+            StreamReader reader = File.OpenText(testPath);
             List<double[]> points = new List<double[]>();
 
-            for (int row = 0; row < num; row++)
-                for (int col = 0; col < num; col++)
-                    points.Add(new double[]{col, row, sourceMatrix[row,col]});
-            Matrix tmat = new Matrix(num, num, points);
-            PCA pcaa = new PCA(tmat, num);
-            pcaa.compute();
-            Matrix rcv = pcaa.transform();
-            for (int col = 0; col < num; col++)
-                if (rcv.get(col, 0) * ans[0, col] < 0)
-                    for (int row = 0; row < num; row++)
-                        rcv.set(col, row, rcv.get(col, row) * -1);
-            for (int row = 0; row < num; row++)
+            reader.Close();
+            Console.WriteLine("Check 1");
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Console.WriteLine("check 2");
+
+            for (int vreq = s; vreq <= e; vreq += step)
             {
-                for (int col = 0; col < num; col++)
-                    Console.WriteLine("{0}\t{1}\t{2}\t{3}", ans[row, col], rcv.get(col, row), pa.Eigenvalues[col], pcaa.eigenValues[col]);
-                Console.WriteLine("------------------------------------------------");
+                for (int creq = s2; creq <= e2; creq += step2)
+                {
+                    int numvalidentries = 0;
+                    reader = File.OpenText(string.Format(trainPath));
+                    points = new List<double[]>();
+                    LogEnum logenum = new LogEnum(trainPath);
+                    int maxRow = 0;
+                    int maxCol = 0;
+                    foreach (string line in logenum)
+                    {
+                        string[] tokens = line.Split(new char[] { '\t' });
+                        double clicks = 0;
+                        double views = 0;
+                        if (valPos == -1)
+                        {
+                            clicks = Double.Parse(tokens[3]);
+                            views = Double.Parse(tokens[2]);
+                        }
+                        if (views < vreq || clicks < creq)
+                            continue;
+                        maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
+                        maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
+                        points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                        numvalidentries += 1;
+                    }
+                    Dictionary<int, double> averages = IO.baselinePredict(trainPath);
+                    
+                    Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+                    foreach (int col in utilMat.getCols())
+                        utilMat.setAvg[col] = averages[col];
+                    utilMat.normalize();
+                    CF filter = new CF(utilMat, true, false);//, true, 10, 20, false);
+                    Console.WriteLine("Check 3");
+                    //filter.iterate(1);
+                    //filter.buildModel();
+                    Tester tester = new Tester(filter, testPts);
+                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
+                    reader.Close();
+                }
             }
+
+            Console.WriteLine("debug: completed AB");
         }
-        public static void ABTest_PCA(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string notes = null, bool normalization = true)
+
+        public static void showData(string trainPath, string outputPath, int rowPos = 1, int colPos = 0, int valPos = -1)
+        {
+            StreamReader reader;
+            List<double[]> points = new List<double[]>();
+
+            int numvalidentries = 0;
+            reader = File.OpenText(string.Format(trainPath));
+            points = new List<double[]>();
+            LogEnum logenum = new LogEnum(trainPath);
+            int maxRow = 0;
+            int maxCol = 0;
+            foreach (string line in logenum)
+            {
+                string[] tokens = line.Split(new char[] { '\t' });
+                double clicks = 0;
+                double views = 0;
+                if (valPos == -1)
+                {
+                    clicks = Double.Parse(tokens[3]);
+                    views = Double.Parse(tokens[2]);
+                }
+                maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
+                maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
+                if (clicks!=0)
+                    points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Log( Math.Min(clicks, views) / views ): Double.Parse(tokens[2]) });
+                numvalidentries += 1;
+            }
+
+            Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+            utilMat.normalize();
+            StreamWriter writer = new StreamWriter(outputPath);
+            foreach (int col in utilMat.getCols())
+                foreach (int row in utilMat.getRowsOfCol(col))
+                {
+                    if (utilMat.get(row, col) == 0)
+                        continue;
+                    //writer.WriteLine(Math.Log((utilMat.get(row, col))));
+                    writer.WriteLine(((utilMat.get(row, col)*utilMat.setAvg[col])-utilMat.setAvg[col])/utilMat.setAvg[col]);
+                    //writer.WriteLine(((utilMat.get(row, col)) - 1) / utilMat.setAvg[col]);
+                }
+            writer.Close();
+            
+            
+        }
+
+        public static void ABTest_i(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string notes = null, bool normalization = true, int iter=3)
         {
             StreamWriter notesWriter = new StreamWriter(outputPrefix + "notes.txt", true);
             notesWriter.WriteLine(notes);
@@ -362,17 +440,16 @@ namespace CF
                         numvalidentries += 1;
                     }
 
-                    PCA loadedpca = (PCA)IO.load("C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_50");
-                    loadedpca.normalize();
-
-                    PCAMatrix utilMat = new PCAMatrix(maxRow + 1, maxCol + 1, points, loadedpca);
-
+                    Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
                     CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
-                    Console.WriteLine("Check 3");
-                    //filter.buildModel();
-
-                    Tester tester = new Tester(filter, testPts);
-                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    for (int i = 0; i < iter; i++)
+                    {
+                        filter.iterate(1);
+                        Console.WriteLine("Check 3");
+                        //filter.buildModel();
+                        Tester tester = new Tester(filter, testPts);
+                        tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + "_" + i + ".txt");
+                    }
                     Console.WriteLine("completed test: minview:{0}\tminclick:{1}\tnumvalidentries:{2}", vreq, creq, numvalidentries);
                     reader.Close();
                 }
@@ -381,7 +458,114 @@ namespace CF
             Console.WriteLine("debug: completed AB");
         }
 
-        public static void train_PCA(int s, int s2, string trainPath, int rowPos = 1, int colPos = 0, int valPos = -1, bool normalization = true)
+        public static void testPCA()
+        {
+            int num = 3;
+            double[,] sourceMatrix = new double[num, num];
+            Random rand = new Random();
+            for (int row = 0; row < num; row++)
+                for (int col = 0; col < num; col++)
+                    sourceMatrix[row, col] = rand.NextDouble();
+            PrincipalComponentAnalysis pa = new PrincipalComponentAnalysis(sourceMatrix);
+            pa.Compute();
+            double[,] ans = pa.Transform(sourceMatrix, num);
+            List<double[]> points = new List<double[]>();
+
+            for (int row = 0; row < num; row++)
+                for (int col = 0; col < num; col++)
+                    points.Add(new double[]{col, row, sourceMatrix[row,col]});
+            Matrix tmat = new Matrix(num, num, points);
+            PCA pcaa = new PCA(tmat, num);
+            pcaa.compute();
+            Matrix rcv = pcaa.transform();
+            for (int col = 0; col < num; col++)
+                if (rcv.get(col, 0) * ans[0, col] < 0)
+                    for (int row = 0; row < num; row++)
+                        rcv.set(col, row, rcv.get(col, row) * -1);
+            for (int row = 0; row < num; row++)
+            {
+                for (int col = 0; col < num; col++)
+                    Console.WriteLine("{0}\t{1}\t{2}\t{3}", ans[row, col], rcv.get(col, row), pa.Eigenvalues[col], pcaa.eigenValues[col]);
+                Console.WriteLine("------------------------------------------------");
+            }
+        }
+        public static void ABTest_PCA(int s, int e, int step, int s2, int e2, int step2, string testPath, string trainPath, string outputPrefix, int rowPos = 1, int colPos = 0, int valPos = -1, string notes = null, bool normalization = true, string pcapath = "C:\\Users\\t-chexia\\Desktop\\ab test final\\mat_fac_big_30")
+        {
+            StreamWriter notesWriter = new StreamWriter(outputPrefix + "notes.txt", true);
+            notesWriter.WriteLine(notes);
+            notesWriter.Close();
+            StreamReader reader = File.OpenText(testPath);
+            List<double[]> points = new List<double[]>();
+
+            reader.Close();
+            Console.WriteLine("Check 1");
+            Matrix testPts = LogProcess.makeUtilMat(932, 528935, testPath, rowPos, colPos);
+            Console.WriteLine("check 2");
+
+            for (int vreq = s; vreq <= e; vreq += step)
+            {
+                for (int creq = s2; creq <= e2; creq += step2)
+                {
+                    
+
+                    PCA loadedpca = (PCA)IO.load(pcapath);
+
+
+
+                    double a = 0;
+                    double b = 0;
+                    double c = 0;
+                    for (int i = 0; i < 30; i++)
+                    {
+                        b = loadedpca.feature_row[i, 0];
+                        c = loadedpca.feature_col[i, 5];
+                        a = loadedpca.feature_row[i, 0] * loadedpca.feature_col[i, 5];
+                    }
+                    int numvalidentries = 0;
+                    reader = File.OpenText(string.Format(trainPath));
+                    points = new List<double[]>();
+                    LogEnum logenum = new LogEnum(trainPath);
+                    int maxRow = 0;
+                    int maxCol = 0;
+                    foreach (string line in logenum)
+                    {
+                        string[] tokens = line.Split(new char[] { '\t' });
+                        double clicks = 0;
+                        double views = 0;
+                        if (valPos == -1)
+                        {
+                            clicks = Double.Parse(tokens[3]);
+                            views = Double.Parse(tokens[2]);
+                        }
+                        if (views < vreq || clicks < creq)
+                            continue;
+                        maxRow = Math.Max(maxRow, int.Parse(tokens[rowPos]));
+                        maxCol = Math.Max(maxCol, int.Parse(tokens[colPos]));
+                        points.Add(new double[3] { Double.Parse(tokens[rowPos]), Double.Parse(tokens[colPos]), valPos == -1 ? Math.Min(clicks, views) / views : Double.Parse(tokens[2]) });
+                        numvalidentries += 1;
+                    }
+                    Dictionary<int, double> averages = IO.baselinePredict(trainPath);
+
+                    Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+                    foreach (int col in utilMat.getCols())
+                        utilMat.setAvg[col] = averages[col];
+                    utilMat.normalize();
+
+                    MFCF filter = new MFCF(loadedpca, utilMat);
+                    //CF filter = new CF(utilMat, true, normalization);//, true, 10, 20, false);
+                    Console.WriteLine("Check 3");
+                    //filter.buildModel();
+
+                    Tester tester = new Tester(filter, testPts);
+                    tester.abtest(outputPrefix + "about_" + vreq + "_" + creq + ".txt");
+                    reader.Close();
+                }
+            }
+
+            Console.WriteLine("debug: completed AB");
+        }
+
+        public static void train_PCA(int s, int s2, string trainPath, int rowPos = 1, int colPos = 0, int valPos = -1)
         {
             int numvalidentries = 0;
             StreamReader reader = File.OpenText(string.Format(trainPath));
@@ -411,7 +595,9 @@ namespace CF
                 numvalidentries += 1;
             }
 
-            PCAMatrix utilMat = new PCAMatrix(maxRow + 1, maxCol + 1, points);
+            Matrix utilMat = new Matrix(maxRow + 1, maxCol + 1, points);
+            PCA pca = new PCA(utilMat, 50);
+            pca.compute();
             return;
         }
         public static void blockTest(string in_mavc, string in_msi, string in_iavc)

@@ -10,26 +10,28 @@ namespace CF
     [Serializable()]
     class PCA
     {
-        private double[,] feature_row;
-        private double[,] feature_col;
+        public double[,] feature_row;
+        public double[,] feature_col;
         private int numFeatures;
-        private Matrix cached_predictions;
-        private Matrix raw;
+        public Matrix cached_predictions;
+        public Matrix raw;
         private double baselrate = 0.001;
         public double[] eigenValues;
-        private double[] rowMean;
-        public PCA(Matrix raw, int dims = 30)
+        public double[] rowMean;
+        public string savePrefix;
+        public PCA(Matrix raw, int dims = 30, string savePrefix = "C:\\Users\\t-chexia\\Desktop\\ab test final\\dump\\mat_fac_big_")
         {
+            this.savePrefix = savePrefix;
             this.raw = raw;
             numFeatures = dims;
             feature_row = new double[numFeatures, raw.GetLength(0)];
             feature_col = new double[numFeatures, raw.GetLength(1)];
             for (int i = 0; i < numFeatures; i++)
                 for (int j = 0; j < raw.GetLength(0); j++)
-                    feature_row[i, j] = 0.1;
+                    feature_row[i, j] = 0.01;
             for (int i = 0; i < numFeatures; i++)
                 for (int j = 0; j < raw.GetLength(1); j++)
-                    feature_col[i, j] = 0.1;
+                    feature_col[i, j] = 0.01;
             cached_predictions = new Matrix(raw.GetLength(0), raw.GetLength(1));
             foreach (int col in raw.getCols())
             {
@@ -49,42 +51,62 @@ namespace CF
         }
         public void compute()
         {
-            preprocess();
-            int iterations = 10000;
+            //preprocess();
+            int iterations = 20000;
 
             for (int feature = 0; feature < numFeatures; feature++)
             {
                 //Console.WriteLine(feature);
                 int counter = 0;
                 bool converged = false;
+                double total_err_old = Int32.MaxValue;
+                int chance = 0;
                 while (!converged)
                 {
-                    double lrate = baselrate * Math.Log(iterations / (1.0 + counter));
-                    Console.WriteLine(""+feature+"\t"+counter);
+                    double lrate = (10 - counter/1000) * baselrate;// *Math.Log(iterations / (1.0 + counter));
                     double max_err = 0;
+                    double total_err = 0;
                     foreach (int col in cached_predictions.getCols())
                         foreach (int row in cached_predictions.getRowsOfCol(col))
                         {
-                            double err = lrate * (raw.get(row, col) - predictRating(row, col, feature));
+                            double rea = raw.get(row, col);
+                            double predicted = predictRating(row, col, feature);
+                            double err = lrate * (rea - predicted);
                             double fr = feature_row[feature, row];
-                            feature_row[feature, row] = fr + err * feature_col[feature, col];
-                            feature_col[feature, col] = feature_col[feature, col] + err * fr;
-                            max_err = Math.Max(err, max_err);
+                            double fc = feature_col[feature, col];
+                            feature_row[feature, row] = fr + err * feature_col[feature, col] - 0.1 * fr;
+                            feature_col[feature, col] = feature_col[feature, col] + err * fr - 0.1 * feature_col[feature, col];
+                            if (rea != 0)
+                                max_err = Math.Max(Math.Abs(rea - predicted) / (rea+1), max_err);
+                            total_err += Math.Pow((rea - predicted),2);
                         }
+                    
+                    Console.WriteLine("" + feature + "\t" + counter + "\t" + max_err + "\t" + total_err);
                     counter++;
-                    if (counter > iterations)
+                    if (Math.Abs(Math.Abs(total_err) - Math.Abs(total_err_old))<Math.Pow(10, -10))
+                        chance++;
+                    else
+                        chance = 0;
+                    if (counter > iterations || chance>3)
                         converged = true;
+                    total_err_old = total_err;
 
                 }
                 foreach (int col in cached_predictions.getCols())
                     foreach (int row in cached_predictions.getRowsOfCol(col))
                         cached_predictions.set(row, col, predictRating(row, col, feature));
-                IO.save(this, "C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_" + feature);
+                IO.save(this, this.savePrefix + feature);
             }
             normalize();
             //postprocess();
         }
-
+        public void recompute()
+        {
+            foreach (int col in this.cached_predictions.getCols())
+                foreach (int row in this.cached_predictions.getRowsOfCol(col))
+                    this.cached_predictions.set(row, col, 0);
+            this.compute();
+        }
         public void expandFeatures(int new_numFeatures)
         {
             if (new_numFeatures < this.numFeatures)
@@ -106,7 +128,7 @@ namespace CF
 
         public void cont_compute(int s)
         {
-            int iterations = 10000;
+            int iterations = 30000;
 
             for (int feature = s; feature < numFeatures; feature++)
             {
@@ -135,7 +157,7 @@ namespace CF
                 foreach (int col in cached_predictions.getCols())
                     foreach (int row in cached_predictions.getRowsOfCol(col))
                         cached_predictions.set(row, col, predictRating(row, col, feature));
-                IO.save(this, "C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_fine_" + feature);
+                IO.save(this, "C:\\Users\\t-chexia\\Desktop\\ab test final\\savedPCA_big_" + feature);
             }
             normalize();
             //postprocess();
@@ -174,11 +196,12 @@ namespace CF
                 }
             }
         }
-        private double predictRating(int row, int col, int feature)
+        public double predictRating(int row, int col, int feature)
         {
             double sum = 0;
             sum += feature_row[feature, row] * feature_col[feature, col];
-            return sum + cached_predictions.get(row, col);
+            double rtn = sum + cached_predictions.get(row, col);
+            return rtn;
         }
 
         public double[,] rc_eigenvectors()
